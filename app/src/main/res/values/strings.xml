@@ -3,4 +3,6 @@
     <string name="title_concert_detail">Concert Detail</string>
     <string name="open_navigation_drawer">Open Navigation Drawer</string>
     <string name="close_navitagion_drawer">Close Navigation Drawer</string>
+    <string name="api_key">4MJJ8GxZWmjnsMVP</string>
+    <string name="category_music">music</string>
 </resources>

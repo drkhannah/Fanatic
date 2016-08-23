@@ -12,7 +12,7 @@
               tools:context="com.drkhannah.fanatic.ConcertListActivity">
 
     <!--
-    This layout is a two-pane layout for the Concerts
+    This layout is a two-pane layout for the Concert
     master/detail flow.
     
     -->

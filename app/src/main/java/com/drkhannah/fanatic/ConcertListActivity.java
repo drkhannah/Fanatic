@@ -1,7 +1,5 @@
 package com.drkhannah.fanatic;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -13,18 +11,17 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.drkhannah.fanatic.dummy.DummyContent;
+import com.drkhannah.fanatic.adapters.RecyclerViewAdapter;
+import com.drkhannah.fanatic.models.Concert;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An activity representing a list of Concerts. This activity
+ * An activity representing a list of Concert. This activity
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
  * lead to a {@link ConcertDetailActivity} representing
@@ -38,6 +35,8 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
      * device.
      */
     private boolean mTwoPane;
+    private RecyclerViewAdapter mRecyclerViewAdapter;
+    private List<Concert> mConcertList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +51,11 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "fetching concert data", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                GetConcertsTask getConcertsTask = new GetConcertsTask(ConcertListActivity.this, mRecyclerViewAdapter);
+                getConcertsTask.execute("nofx");
             }
         });
 
@@ -68,9 +70,9 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
 
 
         //recyclerView setup
-        View recyclerView = findViewById(R.id.concert_list);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.concert_list);
         assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
+        setupRecyclerView(recyclerView);
 
         if (findViewById(R.id.concert_detail_container) != null) {
             // The detail container view will be present only in the
@@ -96,7 +98,8 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(DummyContent.ITEMS));
+        mRecyclerViewAdapter = new RecyclerViewAdapter(mConcertList, getSupportFragmentManager(), mTwoPane);
+        recyclerView.setAdapter(mRecyclerViewAdapter);
     }
 
     /**
@@ -127,74 +130,5 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    public class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
-
-        private final List<DummyContent.DummyItem> mValues;
-
-        public SimpleItemRecyclerViewAdapter(List<DummyContent.DummyItem> items) {
-            mValues = items;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.concert_list_content, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mItem = mValues.get(position);
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
-
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        arguments.putString(ConcertDetailFragment.ARG_ITEM_ID, holder.mItem.id);
-                        ConcertDetailFragment fragment = new ConcertDetailFragment();
-                        fragment.setArguments(arguments);
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.concert_detail_container, fragment)
-                                .commit();
-                    } else {
-                        Context context = v.getContext();
-                        Intent intent = new Intent(context, ConcertDetailActivity.class);
-                        intent.putExtra(ConcertDetailFragment.ARG_ITEM_ID, holder.mItem.id);
-
-                        context.startActivity(intent);
-                    }
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return mValues.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            public final TextView mIdView;
-            public final TextView mContentView;
-            public DummyContent.DummyItem mItem;
-
-            public ViewHolder(View view) {
-                super(view);
-                mView = view;
-                mIdView = (TextView) view.findViewById(R.id.id);
-                mContentView = (TextView) view.findViewById(R.id.content);
-            }
-
-            @Override
-            public String toString() {
-                return super.toString() + " '" + mContentView.getText() + "'";
-            }
-        }
     }
 }
