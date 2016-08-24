@@ -11,17 +11,17 @@ import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
 /**
- * An activity representing a single Concert detail screen. This
+ * An activity representing a single Event detail screen. This
  * activity is only used narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link ConcertListActivity}.
+ * in a {@link EventListActivity}.
  */
-public class ConcertDetailActivity extends AppCompatActivity {
+public class EventDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_concert_detail);
+        setContentView(R.layout.activity_event_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
@@ -53,12 +53,11 @@ public class ConcertDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(ConcertDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(ConcertDetailFragment.ARG_ITEM_ID));
-            ConcertDetailFragment fragment = new ConcertDetailFragment();
+            arguments.putParcelable(EventDetailFragment.PARCELABLE_EVENT, getIntent().getParcelableExtra(EventDetailFragment.PARCELABLE_EVENT));
+            EventDetailFragment fragment = new EventDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.concert_detail_container, fragment)
+                    .add(R.id.event_detail_container, fragment)
                     .commit();
         }
     }
@@ -73,7 +72,7 @@ public class ConcertDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            navigateUpTo(new Intent(this, ConcertListActivity.class));
+            navigateUpTo(new Intent(this, EventListActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

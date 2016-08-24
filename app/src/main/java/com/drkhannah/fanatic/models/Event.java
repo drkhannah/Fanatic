@@ -1,13 +1,15 @@
 package com.drkhannah.fanatic.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
 /**
  * Created by dhannah on 8/23/16.
  */
-public class Concert {
+public class Event implements Parcelable{
 
-    private String mArtistName;
     private String mTitle;
     private String mStartTime;
     private String mVenueName;
@@ -19,8 +21,7 @@ public class Concert {
     private String mDescription;
     private String mImageUrl;
 
-    public Concert(String artistName, String title, String startTime, String venueName, String cityName, String countryName, List<String> performers, String longitude, String latitude, String description, String imageUrl) {
-        mArtistName = artistName;
+    public Event(String title, String startTime, String venueName, String cityName, String countryName, List<String> performers, String longitude, String latitude, String description, String imageUrl) {
         mTitle = title;
         mStartTime = startTime;
         mVenueName = venueName;
@@ -33,9 +34,51 @@ public class Concert {
         mImageUrl = imageUrl;
     }
 
-    public String getArtistName() {
-        return mArtistName;
+    //Parcelable code
+    protected Event(Parcel in) {
+        mTitle = in.readString();
+        mStartTime = in.readString();
+        mVenueName = in.readString();
+        mCityName = in.readString();
+        mCountryName = in.readString();
+        mPerformers = in.createStringArrayList();
+        mLongitude = in.readString();
+        mLatitude = in.readString();
+        mDescription = in.readString();
+        mImageUrl = in.readString();
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mTitle);
+        dest.writeString(mStartTime);
+        dest.writeString(mVenueName);
+        dest.writeString(mCityName);
+        dest.writeString(mCountryName);
+        dest.writeStringList(mPerformers);
+        dest.writeString(mLongitude);
+        dest.writeString(mLatitude);
+        dest.writeString(mDescription);
+        dest.writeString(mImageUrl);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Event> CREATOR = new Creator<Event>() {
+        @Override
+        public Event createFromParcel(Parcel in) {
+            return new Event(in);
+        }
+
+        @Override
+        public Event[] newArray(int size) {
+            return new Event[size];
+        }
+    };
+    //end Parcelable code
 
     public String getTitle() {
         return mTitle;
@@ -77,11 +120,14 @@ public class Concert {
         return mImageUrl;
     }
 
+    public void setTitle(String title) {
+        mTitle = title;
+    }
+
     @Override
     public String toString() {
-        return "Concert{" +
-                "mArtistName='" + mArtistName + '\'' +
-                ", mTitle='" + mTitle + '\'' +
+        return "Event{" +
+                "mTitle='" + mTitle + '\'' +
                 ", mStartTime='" + mStartTime + '\'' +
                 ", mVenueName='" + mVenueName + '\'' +
                 ", mCityName='" + mCityName + '\'' +

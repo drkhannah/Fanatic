@@ -10,21 +10,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.drkhannah.fanatic.ConcertDetailActivity;
-import com.drkhannah.fanatic.ConcertDetailFragment;
+import com.drkhannah.fanatic.EventDetailActivity;
+import com.drkhannah.fanatic.EventDetailFragment;
 import com.drkhannah.fanatic.R;
-import com.drkhannah.fanatic.models.Concert;
+import com.drkhannah.fanatic.models.Event;
 
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-    private List<Concert> mConcerts;
+    private List<Event> mEvents;
     private FragmentManager mFragmentManager;
     private boolean mTwoPane;
 
-    public RecyclerViewAdapter(List<Concert> items, FragmentManager fragmentManager, boolean twoPaneMode) {
-        mConcerts = items;
+    public RecyclerViewAdapter(List<Event> items, FragmentManager fragmentManager, boolean twoPaneMode) {
+        mEvents = items;
         mFragmentManager = fragmentManager;
         mTwoPane = twoPaneMode;
     }
@@ -32,13 +32,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.concert_list_content, parent, false);
+                .inflate(R.layout.event_list_content, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mConcert = mConcerts.get(position);
+        holder.mEvent = mEvents.get(position);
+        holder.mEventTitleTextView.setText(holder.mEvent.getTitle());
+        holder.mStartTimeTextView.setText(holder.mEvent.getStartTime());
+        holder.mVenueNameTextView.setText(holder.mEvent.getVenueName());
 
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -46,16 +49,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             public void onClick(View v) {
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    //arguments.putString(ConcertDetailFragment.ARG_ITEM_ID, holder.mConcert.id);
-                    ConcertDetailFragment fragment = new ConcertDetailFragment();
+                    arguments.putParcelable(EventDetailFragment.PARCELABLE_EVENT, holder.mEvent);
+                    EventDetailFragment fragment = new EventDetailFragment();
                     fragment.setArguments(arguments);
                     mFragmentManager.beginTransaction()
-                            .replace(R.id.concert_detail_container, fragment)
+                            .replace(R.id.event_detail_container, fragment)
                             .commit();
                 } else {
                     Context context = v.getContext();
-                    Intent intent = new Intent(context, ConcertDetailActivity.class);
-                    //intent.putExtra(ConcertDetailFragment.ARG_ITEM_ID, holder.mConcert.id);
+                    Intent intent = new Intent(context, EventDetailActivity.class);
+                    intent.putExtra(EventDetailFragment.PARCELABLE_EVENT, holder.mEvent);
 
                     context.startActivity(intent);
                 }
@@ -63,32 +66,38 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         });
     }
 
-    public void swapData(List<Concert> newConcerts){
-        mConcerts = newConcerts;
+    public void swapData(List<Event> newEvents){
+        mEvents = newEvents;
         notifyDataSetChanged();
     }
 
     @Override
     public int getItemCount() {
-        return mConcerts.size();
+        return mEvents.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public Concert mConcert;
+        public final TextView mEventTitleTextView;
+        public final TextView mStartTimeTextView;
+        public final TextView mVenueNameTextView;
+        public Event mEvent;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mEventTitleTextView = (TextView) view.findViewById(R.id.event_title_textview);
+            mStartTimeTextView = (TextView) view.findViewById(R.id.start_time_textview);
+            mVenueNameTextView = (TextView) view.findViewById(R.id.venue_name_textview);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            return "ViewHolder{" +
+                    "mEventTitleTextView=" + mEventTitleTextView +
+                    ", mStartTimeTextView=" + mStartTimeTextView +
+                    ", mVenueNameTextView=" + mVenueNameTextView +
+                    '}';
         }
     }
 }

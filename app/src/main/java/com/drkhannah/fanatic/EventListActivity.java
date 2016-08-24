@@ -15,20 +15,20 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.drkhannah.fanatic.adapters.RecyclerViewAdapter;
-import com.drkhannah.fanatic.models.Concert;
+import com.drkhannah.fanatic.models.Event;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An activity representing a list of Concert. This activity
+ * An activity representing a list of Event. This activity
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link ConcertDetailActivity} representing
+ * lead to a {@link EventDetailActivity} representing
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class ConcertListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class EventListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -36,7 +36,7 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
      */
     private boolean mTwoPane;
     private RecyclerViewAdapter mRecyclerViewAdapter;
-    private List<Concert> mConcertList = new ArrayList<>();
+    private List<Event> mEventList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +51,11 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "fetching concert data", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "fetching event data", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
-                GetConcertsTask getConcertsTask = new GetConcertsTask(ConcertListActivity.this, mRecyclerViewAdapter);
-                getConcertsTask.execute("nofx");
+                GetEventsTask getEventsTask = new GetEventsTask(EventListActivity.this, mRecyclerViewAdapter);
+                getEventsTask.execute("comedy", "44107");
             }
         });
 
@@ -70,11 +70,11 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
 
 
         //recyclerView setup
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.concert_list);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.event_list);
         assert recyclerView != null;
         setupRecyclerView(recyclerView);
 
-        if (findViewById(R.id.concert_detail_container) != null) {
+        if (findViewById(R.id.event_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
             // If this view is present, then the
@@ -98,7 +98,7 @@ public class ConcertListActivity extends AppCompatActivity implements Navigation
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        mRecyclerViewAdapter = new RecyclerViewAdapter(mConcertList, getSupportFragmentManager(), mTwoPane);
+        mRecyclerViewAdapter = new RecyclerViewAdapter(mEventList, getSupportFragmentManager(), mTwoPane);
         recyclerView.setAdapter(mRecyclerViewAdapter);
     }
 

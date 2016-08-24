@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.drkhannah.fanatic.adapters.RecyclerViewAdapter;
-import com.drkhannah.fanatic.models.Concert;
+import com.drkhannah.fanatic.models.Event;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,21 +18,23 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by dhannah on 8/23/16.
  */
-public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
+public class GetEventsTask extends AsyncTask<String, Void, List<Event>> {
 
-    private final String LOG_TAG = GetConcertsTask.class.getSimpleName();
+    private final String LOG_TAG = GetEventsTask.class.getSimpleName();
 
     private Context mContext;
     private RecyclerViewAdapter mRecyclerViewAdapter;
 
-    public GetConcertsTask(Context context, RecyclerViewAdapter recyclerViewAdapter) {
+    public GetEventsTask(Context context, RecyclerViewAdapter recyclerViewAdapter) {
         mContext = context;
         mRecyclerViewAdapter = recyclerViewAdapter;
     }
@@ -40,16 +42,20 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
     /* The date/time conversion code is going to be moved outside the asynctask later,
          * so for convenience we're breaking it out into its own method now.
          */
-    private String getReadableDateString(long time) {
-        // Because the API returns a unix timestamp (measured in seconds),
-        // it must be converted to milliseconds in order to be converted to valid date.
-        SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
-        return shortenedDateFormat.format(time);
+    private String getReadableDateString(String time) {
+        // format the start_time that was returned from json
+        Date date = null;
+        try {
+            date = new SimpleDateFormat("yyyy-MM-dd h:mm").parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return new SimpleDateFormat("MM-dd-yyy h:mm").format(date);
     }
 
-    private List<Concert> parseJson(String responseString, String artistToSearch) throws JSONException {
+    private List<Event> parseJson(String responseString) throws JSONException {
 
-        List<Concert> concertsList = new ArrayList<>();
+        List<Event> eventsList = new ArrayList<>();
 
         //these are the properties that we need to get from the JSON response
         final String EVENTS = "events";
@@ -59,8 +65,8 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
         final String VENUE_NAME = "venue_name";
         final String CITY_NAME = "city_name";
         final String COUNTRY_NAME = "country_name";
-        final String PREFORMERS = "performers";
-        final String PREFORMER = "performer";
+        final String PERFORMERS = "performers";
+        final String PERFORMER = "performer";
         final String PERFORMER_NAME = "name";
         final String LONGITUDE = "longitude";
         final String LATITUDE = "latitude";
@@ -70,35 +76,31 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
         final String DESCRIPTION = "description";
 
         //get to the event array in the responseString
-        JSONObject concertsJson = new JSONObject(responseString);
-        JSONObject events = concertsJson.getJSONObject(EVENTS);
+        JSONObject eventsJson = new JSONObject(responseString);
+        JSONObject events = eventsJson.getJSONObject(EVENTS);
         JSONArray eventArray = events.getJSONArray(EVENT);
 
-        //loop through events and create a List<Concert>
+        //loop through events and create a List<Event>
         if (eventArray.length() > 0) {
             for (int i = 0; i < eventArray.length(); i++) {
-                JSONObject jsonConcert = eventArray.getJSONObject(i);
+                JSONObject jsonEvent = eventArray.getJSONObject(i);
 
-                //concert info we want to extra from json
-                String title = jsonConcert.getString(TITLE);
-                String startTime = jsonConcert.getString(START_TIME);
-                String venuName = jsonConcert.getString(VENUE_NAME);
-                String cityName = jsonConcert.getString(CITY_NAME);
-                String countryName = jsonConcert.getString(COUNTRY_NAME);
-                String longitude = jsonConcert.getString(LONGITUDE);
-                String latitude = jsonConcert.getString(LATITUDE);
-                String description = jsonConcert.getString(DESCRIPTION);
+                //event info we want to extra from json
+                String title = jsonEvent.getString(TITLE);
+                String startTime = getReadableDateString(jsonEvent.getString(START_TIME));
+                String venuName = jsonEvent.getString(VENUE_NAME);
+                String cityName = jsonEvent.getString(CITY_NAME);
+                String countryName = jsonEvent.getString(COUNTRY_NAME);
+                String longitude = jsonEvent.getString(LONGITUDE);
+                String latitude = jsonEvent.getString(LATITUDE);
+                String description = jsonEvent.getString(DESCRIPTION);
 
                 //loop through performers to find all performers
                 List<String> performers = new ArrayList<>();
-                JSONObject jsonPerformersObject = jsonConcert.optJSONObject(PREFORMERS);
-                if (jsonPerformersObject == null) {
-                    performers.add(artistToSearch);
-                } else {
-                    JSONArray jsonPerformerArray = jsonPerformersObject.optJSONArray(PREFORMER);
-                    if (jsonPerformerArray == null) {
-                        performers.add(artistToSearch);
-                    } else {
+                JSONObject jsonPerformersObject = jsonEvent.optJSONObject(PERFORMERS);
+                if (jsonPerformersObject != null) {
+                    JSONArray jsonPerformerArray = jsonPerformersObject.optJSONArray(PERFORMER);
+                    if (jsonPerformerArray != null) {
                         for (int j = 0; j < jsonPerformerArray.length(); j++) {
                             JSONObject jsonPerformer = jsonPerformerArray.getJSONObject(j);
                             String performerName = jsonPerformer.getString(PERFORMER_NAME);
@@ -108,7 +110,7 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
                 }
 
                 //get image url
-                JSONObject jsonImage = jsonConcert.optJSONObject(IMAGE);
+                JSONObject jsonImage = jsonEvent.optJSONObject(IMAGE);
                 String jsonImageUrl;
                 if (jsonImage != null) {
                     JSONObject jsonImageSize = jsonImage.getJSONObject(IMAGE_SIZE);
@@ -118,21 +120,22 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
                 }
 
 
-                Concert concert = new Concert(artistToSearch, title, startTime, venuName, cityName, countryName, performers, longitude, latitude, description, jsonImageUrl);
-                concertsList.add(concert);
+                Event event = new Event(title, startTime, venuName, cityName, countryName, performers, longitude, latitude, description, jsonImageUrl);
+                eventsList.add(event);
             }
         }
 
-        return concertsList;
+        return eventsList;
     }
 
     @Override
-    protected List<Concert> doInBackground(String... params) {
+    protected List<Event> doInBackground(String... params) {
 
-        String concertsJsonString = null;
+        String eventsJsonString = null;
 
-        //get what was passed to GetConcertsTask.execute();
-        String artistToSearch = params[0];
+        //get what was passed to GetEventsTask.execute();
+        final String CATEGORY_TO_SEARCH = params[0];
+        final String LOCATION_TO_SEARCH = params[1];
 
         HttpURLConnection connection = null;
         BufferedReader reader = null;
@@ -144,16 +147,15 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
             final String BASE_URL = "http://api.eventful.com/json/events/search?";
             final String API_KEY = "app_key";
             final String CATEGORY = "category";
-            final String KEYWORDS = "keywords";
-
-
-            final String ARTIST = artistToSearch;
+            final String LOCATION = "location";
+            final String PAGE_SIZE = "page_size";
 
             //build a valid URI
             Uri validUri = Uri.parse(BASE_URL).buildUpon()
                     .appendQueryParameter(API_KEY, mContext.getString(R.string.api_key))
-                    .appendQueryParameter(CATEGORY, mContext.getString(R.string.category_music))
-                    .appendQueryParameter(KEYWORDS, ARTIST)
+                    .appendQueryParameter(CATEGORY, CATEGORY_TO_SEARCH)
+                    .appendQueryParameter(LOCATION, LOCATION_TO_SEARCH)
+                    .appendQueryParameter(PAGE_SIZE, mContext.getString(R.string.response_page_size))
                     .build();
 
             URL url = new URL(validUri.toString());
@@ -186,9 +188,9 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
                 return null;
             }
 
-            concertsJsonString = buffer.toString();
+            eventsJsonString = buffer.toString();
 
-            Log.v(LOG_TAG, "RESPONSE FROM BANDSINTOWN: " + concertsJsonString);
+            Log.v(LOG_TAG, "RESPONSE FROM BANDSINTOWN: " + eventsJsonString);
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "ERROR GETTING RESPONSE: " + e);
@@ -203,11 +205,10 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "ERROR CLOSING READER: " + e);
                 }
-
             }
         }
         try {
-            return parseJson(concertsJsonString, artistToSearch);
+            return parseJson(eventsJsonString);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -216,7 +217,7 @@ public class GetConcertsTask extends AsyncTask<String, Void, List<Concert>> {
     }
 
     @Override
-    protected void onPostExecute(List<Concert> result) {
+    protected void onPostExecute(List<Event> result) {
         super.onPostExecute(result);
         mRecyclerViewAdapter.swapData(result);
     }
