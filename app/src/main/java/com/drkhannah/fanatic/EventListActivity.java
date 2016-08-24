@@ -1,6 +1,9 @@
 package com.drkhannah.fanatic;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -54,8 +57,12 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
                 Snackbar.make(view, "fetching event data", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
+                //read location from DefaultSharedPreferences
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EventListActivity.this);
+                String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_default_location));
+                String category = sharedPreferences.getString(getString(R.string.pref_category_key), getString(R.string.pref_default_location));
                 GetEventsTask getEventsTask = new GetEventsTask(EventListActivity.this, mRecyclerViewAdapter);
-                getEventsTask.execute("comedy", "44107");
+                getEventsTask.execute(category, location);
             }
         });
 
@@ -68,12 +75,6 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
-        //recyclerView setup
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.event_list);
-        assert recyclerView != null;
-        setupRecyclerView(recyclerView);
-
         if (findViewById(R.id.event_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
@@ -81,6 +82,13 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
+
+        //recyclerView setup
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.event_list);
+        assert recyclerView != null;
+        setupRecyclerView(recyclerView);
+
+
     }
 
     /**
@@ -113,18 +121,10 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_settings) {
+            // Handle the settings action
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

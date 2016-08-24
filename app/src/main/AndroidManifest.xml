@@ -29,6 +29,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.drkhannah.fanatic.EventListActivity"/>
         </activity>
+        <activity
+                    android:name=".SettingsActivity"
+                    android:label="@string/title_settings_activity"
+                    android:parentActivityName=".EventListActivity">
+                    <meta-data
+                        android:name="android.support.PARENT_ACTIVITY"
+                        android:value="com.drkhannah.fanatic.EventListActivity" />
+                </activity>
     </application>
 
 </manifest>

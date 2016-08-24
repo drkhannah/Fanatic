@@ -1,8 +1,22 @@
 <resources>
     <string name="app_name">Fanatic</string>
     <string name="title_event_detail">Event Detail</string>
+
+    <!--nav drawer-->
     <string name="open_navigation_drawer">Open Navigation Drawer</string>
     <string name="close_navitagion_drawer">Close Navigation Drawer</string>
-    <string name="api_key">4MJJ8GxZWmjnsMVP</string>
-    <string name="response_page_size">100</string>
+
+    <!--eventful api constants-->
+    <string name="api_key" translatable="false">4MJJ8GxZWmjnsMVP</string>
+    <string name="response_page_size" translatable="false">100</string>
+
+    <!--settings activity-->
+    <string name="title_settings_activity">Settings</string>
+    <string name="pref_location_title">Location</string>
+    <string name="pref_location_key" translatable="false">location</string>
+    <string name="pref_default_location" translatable="false">44107</string>
+    <string name="pref_category_key">category</string>
+    <string name="perf_category_title">Category</string>
+    <string name="dialog_title_perf_category">Event Category</string>
+    <string name="settings_toolbar_title">Settings</string>
 </resources>
