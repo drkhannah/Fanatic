@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.drkhannah.fanatic.adapters.RecyclerViewAdapter;
 import com.drkhannah.fanatic.models.Event;
@@ -27,16 +28,18 @@ import java.util.List;
 /**
  * Created by dhannah on 8/23/16.
  */
-public class GetEventsTask extends AsyncTask<String, Void, List<Event>> {
+public class GetEventsTask extends AsyncTask<String, Integer, List<Event>> {
 
     private final String LOG_TAG = GetEventsTask.class.getSimpleName();
 
     private Context mContext;
     private RecyclerViewAdapter mRecyclerViewAdapter;
+    private TextView mEmptyListTextView;
 
-    public GetEventsTask(Context context, RecyclerViewAdapter recyclerViewAdapter) {
+    public GetEventsTask(Context context, RecyclerViewAdapter recyclerViewAdapter, TextView emptyListTextView) {
         mContext = context;
         mRecyclerViewAdapter = recyclerViewAdapter;
+        mEmptyListTextView = emptyListTextView;
     }
 
     /* The date/time conversion code is going to be moved outside the asynctask later,
@@ -77,54 +80,55 @@ public class GetEventsTask extends AsyncTask<String, Void, List<Event>> {
 
         //get to the event array in the responseString
         JSONObject eventsJson = new JSONObject(responseString);
-        JSONObject events = eventsJson.getJSONObject(EVENTS);
-        JSONArray eventArray = events.getJSONArray(EVENT);
+        JSONObject events = eventsJson.optJSONObject(EVENTS);
+        if (events != null) {
+            JSONArray eventArray = events.optJSONArray(EVENT);
+            if (eventArray != null) {
+                //loop through events and create a List<Event>
+                if (eventArray.length() > 0) {
+                    for (int i = 0; i < eventArray.length(); i++) {
+                        JSONObject jsonEvent = eventArray.getJSONObject(i);
 
-        //loop through events and create a List<Event>
-        if (eventArray.length() > 0) {
-            for (int i = 0; i < eventArray.length(); i++) {
-                JSONObject jsonEvent = eventArray.getJSONObject(i);
+                        //event info we want to extra from json
+                        String title = jsonEvent.getString(TITLE);
+                        String startTime = getReadableDateString(jsonEvent.getString(START_TIME));
+                        String venuName = jsonEvent.getString(VENUE_NAME);
+                        String cityName = jsonEvent.getString(CITY_NAME);
+                        String countryName = jsonEvent.getString(COUNTRY_NAME);
+                        String longitude = jsonEvent.getString(LONGITUDE);
+                        String latitude = jsonEvent.getString(LATITUDE);
+                        String description = jsonEvent.getString(DESCRIPTION);
 
-                //event info we want to extra from json
-                String title = jsonEvent.getString(TITLE);
-                String startTime = getReadableDateString(jsonEvent.getString(START_TIME));
-                String venuName = jsonEvent.getString(VENUE_NAME);
-                String cityName = jsonEvent.getString(CITY_NAME);
-                String countryName = jsonEvent.getString(COUNTRY_NAME);
-                String longitude = jsonEvent.getString(LONGITUDE);
-                String latitude = jsonEvent.getString(LATITUDE);
-                String description = jsonEvent.getString(DESCRIPTION);
-
-                //loop through performers to find all performers
-                List<String> performers = new ArrayList<>();
-                JSONObject jsonPerformersObject = jsonEvent.optJSONObject(PERFORMERS);
-                if (jsonPerformersObject != null) {
-                    JSONArray jsonPerformerArray = jsonPerformersObject.optJSONArray(PERFORMER);
-                    if (jsonPerformerArray != null) {
-                        for (int j = 0; j < jsonPerformerArray.length(); j++) {
-                            JSONObject jsonPerformer = jsonPerformerArray.getJSONObject(j);
-                            String performerName = jsonPerformer.getString(PERFORMER_NAME);
-                            performers.add(performerName);
+                        //loop through performers to find all performers
+                        List<String> performers = new ArrayList<>();
+                        JSONObject jsonPerformersObject = jsonEvent.optJSONObject(PERFORMERS);
+                        if (jsonPerformersObject != null) {
+                            JSONArray jsonPerformerArray = jsonPerformersObject.optJSONArray(PERFORMER);
+                            if (jsonPerformerArray != null) {
+                                for (int j = 0; j < jsonPerformerArray.length(); j++) {
+                                    JSONObject jsonPerformer = jsonPerformerArray.getJSONObject(j);
+                                    String performerName = jsonPerformer.getString(PERFORMER_NAME);
+                                    performers.add(performerName);
+                                }
+                            }
                         }
+
+                        //get image url
+                        JSONObject jsonImage = jsonEvent.optJSONObject(IMAGE);
+                        String jsonImageUrl;
+                        if (jsonImage != null) {
+                            JSONObject jsonImageSize = jsonImage.getJSONObject(IMAGE_SIZE);
+                            jsonImageUrl = jsonImageSize.getString(IMAGE_URL);
+                        } else {
+                            jsonImageUrl = null;
+                        }
+
+                        Event event = new Event(title, startTime, venuName, cityName, countryName, performers, longitude, latitude, description, jsonImageUrl);
+                        eventsList.add(event);
                     }
                 }
-
-                //get image url
-                JSONObject jsonImage = jsonEvent.optJSONObject(IMAGE);
-                String jsonImageUrl;
-                if (jsonImage != null) {
-                    JSONObject jsonImageSize = jsonImage.getJSONObject(IMAGE_SIZE);
-                    jsonImageUrl = jsonImageSize.getString(IMAGE_URL);
-                } else {
-                    jsonImageUrl = null;
-                }
-
-
-                Event event = new Event(title, startTime, venuName, cityName, countryName, performers, longitude, latitude, description, jsonImageUrl);
-                eventsList.add(event);
             }
         }
-
         return eventsList;
     }
 
@@ -136,6 +140,7 @@ public class GetEventsTask extends AsyncTask<String, Void, List<Event>> {
         //get what was passed to GetEventsTask.execute();
         final String CATEGORY_TO_SEARCH = params[0];
         final String LOCATION_TO_SEARCH = params[1];
+        final String KEYWORDS_TO_SEARCH = params[2];
 
         HttpURLConnection connection = null;
         BufferedReader reader = null;
@@ -148,6 +153,7 @@ public class GetEventsTask extends AsyncTask<String, Void, List<Event>> {
             final String API_KEY = "app_key";
             final String CATEGORY = "category";
             final String LOCATION = "location";
+            final String KEYWORDS = "keywords";
             final String PAGE_SIZE = "page_size";
 
             //build a valid URI
@@ -155,6 +161,7 @@ public class GetEventsTask extends AsyncTask<String, Void, List<Event>> {
                     .appendQueryParameter(API_KEY, mContext.getString(R.string.api_key))
                     .appendQueryParameter(CATEGORY, CATEGORY_TO_SEARCH)
                     .appendQueryParameter(LOCATION, LOCATION_TO_SEARCH)
+                    .appendQueryParameter(KEYWORDS, KEYWORDS_TO_SEARCH)
                     .appendQueryParameter(PAGE_SIZE, mContext.getString(R.string.response_page_size))
                     .build();
 
@@ -219,6 +226,12 @@ public class GetEventsTask extends AsyncTask<String, Void, List<Event>> {
     @Override
     protected void onPostExecute(List<Event> result) {
         super.onPostExecute(result);
-        mRecyclerViewAdapter.swapData(result);
+        if (result.size() != 0) {
+            mRecyclerViewAdapter.swapData(result);
+            mEmptyListTextView.setText(null);
+        } else {
+            mEmptyListTextView.setText(R.string.no_events_returned_label);
+            mRecyclerViewAdapter.swapData(null);
+        }
     }
 }

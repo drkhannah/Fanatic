@@ -16,9 +16,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.drkhannah.fanatic.adapters.RecyclerViewAdapter;
 import com.drkhannah.fanatic.models.Event;
+import com.drkhannah.fanatic.settings.SettingsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
     private boolean mTwoPane;
     private RecyclerViewAdapter mRecyclerViewAdapter;
     private List<Event> mEventList = new ArrayList<>();
+    private TextView mEmptyListTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,13 +59,8 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
             public void onClick(View view) {
                 Snackbar.make(view, "fetching event data", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
-                //read location from DefaultSharedPreferences
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EventListActivity.this);
-                String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_default_location));
-                String category = sharedPreferences.getString(getString(R.string.pref_category_key), getString(R.string.pref_default_location));
-                GetEventsTask getEventsTask = new GetEventsTask(EventListActivity.this, mRecyclerViewAdapter);
-                getEventsTask.execute(category, location);
+                Intent intent = new Intent(EventListActivity.this, SearchActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -88,7 +86,27 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         assert recyclerView != null;
         setupRecyclerView(recyclerView);
 
+        mEmptyListTextView = (TextView) findViewById(R.id.empty_events_textview);
+        mEmptyListTextView.setText(R.string.prompt_search_events);
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //read location from DefaultSharedPreferences
+        SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(EventListActivity.this);
+        String category = defaultPreferences.getString(getString(R.string.pref_category_key), getString(R.string.pref_default_category));
+        String location = defaultPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_default_location));
+        String keyword = defaultPreferences.getString(getString(R.string.pref_keyword_key), getString(R.string.pref_default_keyword));
+        GetEventsTask getEventsTask = new GetEventsTask(EventListActivity.this, mRecyclerViewAdapter, mEmptyListTextView);
+        getEventsTask.execute(category, location, keyword);
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
     }
 
     /**
@@ -122,7 +140,7 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         int id = item.getItemId();
 
         if (id == R.id.nav_settings) {
-            // Handle the settings action
+            // Handle the activity_settings action
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         }

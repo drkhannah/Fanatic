@@ -10,7 +10,7 @@
     <string name="api_key" translatable="false">4MJJ8GxZWmjnsMVP</string>
     <string name="response_page_size" translatable="false">100</string>
 
-    <!--settings activity-->
+    <!--activity_settings activity-->
     <string name="title_settings_activity">Settings</string>
     <string name="pref_location_title">Location</string>
     <string name="pref_location_key" translatable="false">location</string>
@@ -19,4 +19,12 @@
     <string name="perf_category_title">Category</string>
     <string name="dialog_title_perf_category">Event Category</string>
     <string name="settings_toolbar_title">Settings</string>
+    <string name="no_events_returned_label">no events returned</string>
+    <string name="prompt_search_events">Search for Events</string>
+    <string name="hint_search_by_keyword">Search By Keyword</string>
+    <string name="menu_title_search_keywords">Search Keywords</string>
+    <string name="pref_keyword_key">KEYWORD_QUERY</string>
+    <string name="label_search_activity">Search Activity</string>
+    <string name="pref_default_keyword">null</string>
+    <string name="pref_default_category">null</string>
 </resources>
