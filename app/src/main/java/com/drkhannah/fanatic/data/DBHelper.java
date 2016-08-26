@@ -26,8 +26,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 DBContract.SearchEntry._ID + " INTEGER PRIMARY KEY," +
                 DBContract.SearchEntry.CATEGORY + " TEXT NOT NULL, " +
                 DBContract.SearchEntry.LOCATION + " TEXT NOT NULL, " +
-                DBContract.SearchEntry.CATEGORY + " TEXT NOT NULL, " +
-                //replace duplicate searches
+                DBContract.SearchEntry.KEYWORDS + " TEXT NOT NULL, " +
+                //replace duplicate search entries
                 " UNIQUE (" + DBContract.SearchEntry.CATEGORY + ", " + DBContract.SearchEntry.LOCATION + ", " + DBContract.SearchEntry.CATEGORY + ") ON CONFLICT REPLACE );";
 
         // Create a table to hold records of events.  _id|search_id|title|start_time|venue_name|city_name|county_name|performers|longitude|latitude|description|img_url
@@ -42,6 +42,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 DBContract.EventsEntry.PERFORMERS + " TEXT NOT NULL, " +
                 DBContract.EventsEntry.LONGITUDE + " TEXT NOT NULL, " +
                 DBContract.EventsEntry.LATITUDE + " TEXT NOT NULL, " +
+                DBContract.EventsEntry.DESCRIPTION + " TEXT NOT NULL, " +
+                DBContract.EventsEntry.IMG_URL + " TEXT NOT NULL, " +
 
                 // Set up the search_id column as a foreign key to Search table.
                 " FOREIGN KEY (" + DBContract.EventsEntry.SEARCH_ID + ") REFERENCES " + DBContract.SearchEntry.TABLE_NAME + " (" + DBContract.SearchEntry._ID + "), " +

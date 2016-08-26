@@ -18,6 +18,7 @@ import java.util.Set;
 
 public class TestUtilities extends AndroidTestCase {
     static final String TEST_CATEGORY = "music";
+    static final String TEST_CATEGORY_2 = "sports";
     static final String TEST_LOCATION = "44107";
     static final String TEST_KEYWORDS = "rock";
 
@@ -34,9 +35,7 @@ public class TestUtilities extends AndroidTestCase {
             int idx = valueCursor.getColumnIndex(columnName);
             assertFalse("Column '" + columnName + "' not found. " + error, idx == -1);
             String expectedValue = entry.getValue().toString();
-            assertEquals("Value '" + entry.getValue().toString() +
-                    "' did not match the expected value '" +
-                    expectedValue + "'. " + error, expectedValue, valueCursor.getString(idx));
+            assertEquals("Value '" + entry.getValue().toString() + "' did not match the expected value '" + expectedValue + "'. " + error, expectedValue, valueCursor.getString(idx));
         }
     }
 
@@ -64,6 +63,16 @@ public class TestUtilities extends AndroidTestCase {
         // Create a new map of values, where column names are the keys
         ContentValues testValues = new ContentValues();
         testValues.put(DBContract.SearchEntry.CATEGORY, TEST_CATEGORY);
+        testValues.put(DBContract.SearchEntry.LOCATION, TEST_LOCATION);
+        testValues.put(DBContract.SearchEntry.KEYWORDS, TEST_KEYWORDS);
+
+        return testValues;
+    }
+
+    static ContentValues createDifferentSearchValues() {
+        // Create a new map of values, where column names are the keys
+        ContentValues testValues = new ContentValues();
+        testValues.put(DBContract.SearchEntry.CATEGORY, TEST_CATEGORY_2);
         testValues.put(DBContract.SearchEntry.LOCATION, TEST_LOCATION);
         testValues.put(DBContract.SearchEntry.KEYWORDS, TEST_KEYWORDS);
 

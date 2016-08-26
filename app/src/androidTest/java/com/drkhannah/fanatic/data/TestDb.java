@@ -20,10 +20,12 @@ public class TestDb extends AndroidTestCase {
     }
 
     /*
-        This function gets called before each test is executed to delete the database.  This makes
-        sure that we always have a clean test.
+        Delete the database before every test
      */
-    public void setUp() {
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
         deleteTheDatabase();
     }
 
@@ -35,8 +37,8 @@ public class TestDb extends AndroidTestCase {
         tableNameHashSet.add(DBContract.SearchEntry.TABLE_NAME);
         tableNameHashSet.add(DBContract.EventsEntry.TABLE_NAME);
 
-        mContext.deleteDatabase(DBHelper.DATABASE_NAME);
-        SQLiteDatabase db = new DBHelper(this.mContext).getWritableDatabase();
+        SQLiteDatabase db = new DBHelper(mContext).getWritableDatabase();
+        //is the database open?
         assertEquals(true, db.isOpen());
 
         // have we created the tables we want?
@@ -51,12 +53,12 @@ public class TestDb extends AndroidTestCase {
         } while( c.moveToNext() );
 
         // if this fails, it means that your database doesn't contain both the search entry
-        // and Evennt entry tables
+        // and Event entry tables
         assertTrue("Error: Your database was created without both the search entry and event entry tables",
                 tableNameHashSet.isEmpty());
 
         // does search table contain the correct columns?
-        c = db.rawQuery("PRAGMA table_info(" + DBContract.EventsEntry.TABLE_NAME + ")",
+        c = db.rawQuery("PRAGMA table_info(" + DBContract.SearchEntry.TABLE_NAME + ")",
                 null);
 
         assertTrue("Error: This means that we were unable to query the database for table information.",
@@ -75,8 +77,7 @@ public class TestDb extends AndroidTestCase {
             searchColumnHashSet.remove(columnName);
         } while(c.moveToNext());
 
-        // if this fails, it means that your database doesn't contain all of the required search
-        // entry columns
+        // if this fails, it means that your database doesn't contain all of the required search columns
         assertTrue("Error: The database doesn't contain all of the required search entry columns",
                 searchColumnHashSet.isEmpty());
 
@@ -89,18 +90,18 @@ public class TestDb extends AndroidTestCase {
 
         // Build a HashSet of all of the column names we want to look for
         final HashSet<String> eventColumnHashSet = new HashSet<String>();
-        searchColumnHashSet.add(DBContract.EventsEntry._ID);
-        searchColumnHashSet.add(DBContract.EventsEntry.SEARCH_ID);
-        searchColumnHashSet.add(DBContract.EventsEntry.TITLE);
-        searchColumnHashSet.add(DBContract.EventsEntry.START_TIME);
-        searchColumnHashSet.add(DBContract.EventsEntry.VENUE_NAME);
-        searchColumnHashSet.add(DBContract.EventsEntry.CITY_NAME);
-        searchColumnHashSet.add(DBContract.EventsEntry.COUNTRY_NAME);
-        searchColumnHashSet.add(DBContract.EventsEntry.PERFORMERS);
-        searchColumnHashSet.add(DBContract.EventsEntry.LONGITUDE);
-        searchColumnHashSet.add(DBContract.EventsEntry.LATITUDE);
-        searchColumnHashSet.add(DBContract.EventsEntry.DESCRIPTION);
-        searchColumnHashSet.add(DBContract.EventsEntry.IMG_URL);
+        eventColumnHashSet.add(DBContract.EventsEntry._ID);
+        eventColumnHashSet.add(DBContract.EventsEntry.SEARCH_ID);
+        eventColumnHashSet.add(DBContract.EventsEntry.TITLE);
+        eventColumnHashSet.add(DBContract.EventsEntry.START_TIME);
+        eventColumnHashSet.add(DBContract.EventsEntry.VENUE_NAME);
+        eventColumnHashSet.add(DBContract.EventsEntry.CITY_NAME);
+        eventColumnHashSet.add(DBContract.EventsEntry.COUNTRY_NAME);
+        eventColumnHashSet.add(DBContract.EventsEntry.PERFORMERS);
+        eventColumnHashSet.add(DBContract.EventsEntry.LONGITUDE);
+        eventColumnHashSet.add(DBContract.EventsEntry.LATITUDE);
+        eventColumnHashSet.add(DBContract.EventsEntry.DESCRIPTION);
+        eventColumnHashSet.add(DBContract.EventsEntry.IMG_URL);
 
         int eventColumnNameIndex = c.getColumnIndex("name");
         do {
@@ -112,6 +113,7 @@ public class TestDb extends AndroidTestCase {
         // entry columns
         assertTrue("Error: The database doesn't contain all of the required search entry columns",
                 eventColumnHashSet.isEmpty());
+        //close the database
         db.close();
     }
 
@@ -122,35 +124,26 @@ public class TestDb extends AndroidTestCase {
 
 
     public void testEventTable() {
-        // First insert the search, and then use the searchRowId to insert
-        // the event. Make sure to cover as many failure cases as you can.
-
-        // Instead of rewriting all of the code we've already written in testSearchTable
-        // we can move this code to insertSearch and then call insertSearch from both
-        // tests. Why move it? We need the code to return the ID of the inserted search
-        // and our testSearchTable can only return void because it's a test.
-
+        //insert a search record, then use the returned id as the search_id for your events inserts
         long searchRowId = insertSearch();
 
         // Make sure we have a valid row ID.
         assertFalse("Error: Search Not Inserted Correctly", searchRowId == -1L);
 
-        // First step: Get reference to writable database
-        // If there's an error in those massive SQL table creation Strings,
-        // errors will be thrown here when you try to get a writable database.
-        DBHelper dbHelper = new DBHelper(mContext);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        //get a writable database
+        SQLiteDatabase db = new DBHelper(mContext).getWritableDatabase();
+        //is the database open?
+        assertEquals(true, db.isOpen());
 
-        // Second Step (Event): Create event values
+        // Create event values
         ContentValues eventValues = TestUtilities.createEventValues(searchRowId);
 
-        // Third Step (Event): Insert ContentValues into database and get a row ID back
+        // Insert ContentValues into events table and get a row ID back
         long eventRowId = db.insert(DBContract.EventsEntry.TABLE_NAME, null, eventValues);
         assertTrue(eventRowId != -1);
 
-        // Fourth Step: Query the database and receive a Cursor back
-        // A cursor is your primary interface to the query results.
-        Cursor eventCursor = db.query(
+        // Query the events table and receive a Cursor back
+        Cursor eventTableCursor = db.query(
                 DBContract.EventsEntry.TABLE_NAME,  // Table to Query
                 null, // leaving "columns" null just returns all the columns.
                 null, // cols for "where" clause
@@ -160,47 +153,58 @@ public class TestDb extends AndroidTestCase {
                 null  // sort order
         );
 
-        // Move the cursor to the first valid database row and check to see if we have any rows
-        assertTrue( "Error: No Records returned from Search query", eventCursor.moveToFirst() );
+        // move the cursor to verify that a record was returned
+        assertTrue( "Error: No Records returned from Search query", eventTableCursor.moveToFirst() );
 
-        // Fifth Step: Validate the search Query
-        TestUtilities.validateCurrentRecord("testInsertReadDb EventsEntry failed to validate",
-                eventCursor, eventValues);
+        // Validate the event record
+        TestUtilities.validateCurrentRecord("Error: Search Query Validation Failed",
+                eventTableCursor, eventValues);
 
-        // Move the cursor to demonstrate that there is only one record in the database
+        //move cursor to verify that there is only one record in the database
         assertFalse( "Error: More than one record returned from event query",
-                eventCursor.moveToNext() );
+                eventTableCursor.moveToNext() );
 
-        // Sixth Step: Close cursor and database
-        eventCursor.close();
-        dbHelper.close();
+        //Close cursor and database
+        eventTableCursor.close();
+        db.close();
     }
 
     public long insertSearch() {
 
-        // First step: Get reference to writable database
-        // If there's an error in those massive SQL table creation Strings,
-        // errors will be thrown here when you try to get a writable database.
-        DBHelper dbHelper = new DBHelper(mContext);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        // Get reference to writable database
+        // SQL table creation String errors will be thrown here when you try to get a writable database.
+        SQLiteDatabase db = new DBHelper(mContext).getWritableDatabase();
+        //is the database open?
+        assertEquals(true, db.isOpen());
 
-        // Second Step: Create ContentValues of what you want to insert
-        // (you can use the createSearchValues if you wish)
+        // Create ContentValues of what you want to insert with createSearchValues from TestUtilities
         ContentValues testValues = TestUtilities.createSearchValues();
+        //create a different set of searchValues to be inserted
+        ContentValues differentValues = TestUtilities.createDifferentSearchValues();
 
-        // Third Step: Insert ContentValues into database and get a row ID back
+        // Insert testValues into database and get a row ID back
         long searchRowId;
         searchRowId = db.insert(DBContract.SearchEntry.TABLE_NAME, null, testValues);
 
         // Verify we got a row back.
         assertTrue(searchRowId != -1);
 
-        // Data's inserted.  IN THEORY.  Now pull some out to stare at it and verify it made
-        // the round trip.
+        //insert a duplicate testValues to make sure the last row gets replaced
+        long searchRowId2;
+        searchRowId2 = db.insert(DBContract.SearchEntry.TABLE_NAME, null, testValues);
 
-        // Fourth Step: Query the database and receive a Cursor back
-        // A cursor is your primary interface to the query results.
-        Cursor cursor = db.query(
+        // Verify we got a row back.
+        assertTrue(searchRowId2 != -1);
+
+        //insert a different search values that wont be replaced
+        long searchRowId3;
+        searchRowId3 = db.insert(DBContract.SearchEntry.TABLE_NAME, null, differentValues);
+
+        // Verify we got a row back.
+        assertTrue(searchRowId3 != -1);
+
+        // Verify it was inserted by querying the database and getting Cursor back
+        Cursor searchTableCursor = db.query(
                 DBContract.SearchEntry.TABLE_NAME,  // Table to Query
                 null, // all columns
                 null, // Columns for the "where" clause
@@ -210,23 +214,33 @@ public class TestDb extends AndroidTestCase {
                 null // sort order
         );
 
-        // Move the cursor to a valid database row and check to see if we got any records back
-        // from the query
-        assertTrue( "Error: No Records returned from search query", cursor.moveToFirst() );
+        // If searchTableCursor.moveToFirst() returns false, then no records were returned from the search table
+        assertTrue( "Error: No Records returned from search query", searchTableCursor.moveToFirst() );
 
-        // Fifth Step: Validate data in resulting Cursor with the original ContentValues
-        // (you can use the validateCurrentRecord function in TestUtilities to validate the
-        // query if you like)
+        // use validateCurrentRecord method from TestUtilities
+        // to validate the records values match our test ContentValues
         TestUtilities.validateCurrentRecord("Error: Search Query Validation Failed",
-                cursor, testValues);
+                searchTableCursor, testValues);
 
-        // Move the cursor to demonstrate that there is only one record in the database
-        assertFalse( "Error: More than one record returned from Search query",
-                cursor.moveToNext());
+        // Verify that different search values were inserted
+        assertTrue( "Error: Different search values were not returned from Search Table query",
+                searchTableCursor.moveToNext());
 
-        // Sixth Step: Close Cursor and Database
-        cursor.close();
+        // Move the searchTableCursor to verify that there are only two record in the database
+        assertFalse( "Error: More than two record returned from Search Table query",
+                searchTableCursor.moveToNext());
+
+        //Close Cursor and Database
+        searchTableCursor.close();
         db.close();
-        return searchRowId;
+        return searchRowId2;
     }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        deleteTheDatabase();
+    }
+
+
 }
