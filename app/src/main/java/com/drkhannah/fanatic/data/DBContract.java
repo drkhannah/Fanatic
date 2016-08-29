@@ -37,7 +37,7 @@ public class DBContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     public static final String PATH_SEARCH = "search";
-    public static final String PATH_EVENT = "events";
+    public static final String PATH_EVENTS = "events";
 
     public static final class SearchEntry implements SearchColumns, BaseColumns {
         public static final String TABLE_NAME = "search";
@@ -59,30 +59,41 @@ public class DBContract {
     public static final class EventsEntry implements EventsColumns, BaseColumns {
         public static final String TABLE_NAME = "events";
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-                .appendEncodedPath(PATH_EVENT)
+                .appendEncodedPath(PATH_EVENTS)
                 .build();
 
         //MIME TYPE to return more than one row from the event table
-        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_EVENT;
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_EVENTS;
         //MIME TYPE to return a single row from the event table
-        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_EVENT;
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_EVENTS;
+
+        //builds a URI from a event id
+        public static Uri buildEventUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
 
         //builds a URI from a search_id
-        public static Uri buildEventListForSearchUri(String searchId) {
-            return CONTENT_URI.buildUpon().appendPath(searchId).build();
+        public static Uri buildEventListForSearchUri(long searchId) {
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(searchId)).build();
         }
 
-        //builds a URI from a search_id and date
-        public static Uri buildEventForSearchWithDate(String searchId, String date) {
-            return CONTENT_URI.buildUpon().appendPath(searchId).appendPath(date).build();
+        //builds a URI from a search_id and date and title
+        public static Uri buildEventListForSearchWithDateAndTitleUri(long searchId, String date, String title) {
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(searchId)).appendPath(date).appendPath(title).build();
         }
 
-        public static String getEventFromUri(Uri uri) {
-            return uri.getPathSegments().get(1);
+        public static long getSearchIdFromUri(Uri uri) {
+            return Long.parseLong(uri.getPathSegments().get(1));
         }
 
-        public static String getDateFromUri(Uri uri) {
+        public static String getStartTimeFromUri(Uri uri) {
             return uri.getPathSegments().get(2);
         }
+
+        public static String getTitleFromUri(Uri uri) {
+            return uri.getPathSegments().get(3);
+        }
+
+
     }
 }

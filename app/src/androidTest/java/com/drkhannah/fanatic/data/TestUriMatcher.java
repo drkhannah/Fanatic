@@ -15,29 +15,42 @@
  */
 package com.drkhannah.fanatic.data;
 
-//public class TestUriMatcher extends AndroidTestCase {
-//    private static final String ARTIST_QUERY = "nofx";
-//;
-//
-//    // content://com.drkhannah.concerts2/concert"
-//    private static final Uri TEST_CONCERTS_DIR = DBContract.EventsEntry.CONTENT_URI;
-//    private static final Uri TEST_CONCERTS_FOR_ARTIST_DIR = ConcertsContract.ConcertEntry.buildConcertsListForArtist(ARTIST_QUERY);
-//    // content://com.drkhannah.concerts2/location"
-//    private static final Uri TEST_ARTIST_DIR = ConcertsContract.ArtistEntry.CONTENT_URI;
-//
-//    /*
-//        Students: This function tests that your UriMatcher returns the correct integer value
-//        for each of the Uri types that our ContentProvider can handle.  Uncomment this when you are
-//        ready to test your UriMatcher.
-//     */
-//    public void testUriMatcher() {
-//        UriMatcher testMatcher = ConcertsContentProvider.buildUriMatcher();
-//
-//        assertEquals("Error: The CONCERTS URI was matched incorrectly.",
-//                testMatcher.match(TEST_CONCERTS_DIR), ConcertsContentProvider.CONCERTS);
-//        assertEquals("Error: The CONCERTS FOR ARTIST URI was matched incorrectly.",
-//                testMatcher.match(TEST_CONCERTS_FOR_ARTIST_DIR), ConcertsContentProvider.CONCERTS_FOR_ARTIST);
-//        assertEquals("Error: The ARTIST URI was matched incorrectly.",
-//                testMatcher.match(TEST_ARTIST_DIR), ConcertsContentProvider.ARTIST);
-//    }
-//}
+import android.content.UriMatcher;
+import android.net.Uri;
+import android.test.AndroidTestCase;
+
+public class TestUriMatcher extends AndroidTestCase {
+    private static final long TEST_SEARCH_ID = 1;
+    private static final String TEST_START_TIME = "9:00";
+    private static final String TEST_TITLE = "title";
+;
+
+    // content://com.drkhannah.fanatic.provider/events"
+    private static final Uri TEST_EVENTS_DIR = DBContract.EventsEntry.CONTENT_URI;
+
+    // content://com.drkhannah.fanatic.provider/search"
+    private static final Uri TEST_SEARCH_DIR = DBContract.SearchEntry.CONTENT_URI;
+
+    // content://com.drkhannah.fanatic.provider/events/#"
+    private static final Uri TEST_EVENTS_FOR_SEARCH_DIR = DBContract.EventsEntry.buildEventListForSearchUri(TEST_SEARCH_ID);
+
+    // content://com.drkhannah.fanatic.provider/events/#/*/*"
+    private static final Uri TEST_EVENT_FOR_DATE_AND_TITLE_DIR = DBContract.EventsEntry.buildEventListForSearchWithDateAndTitleUri(TEST_SEARCH_ID, TEST_START_TIME, TEST_TITLE);
+
+
+    /*
+        This function tests that your UriMatcher returns the correct integer value
+        for each of the Uri types that our Provider can handle.
+     */
+    public void testUriMatcher() {
+        UriMatcher testMatcher = Provider.buildUriMatcher();
+
+        assertEquals("Error: The EVENTS_URI was matched incorrectly.", testMatcher.match(TEST_EVENTS_DIR), Provider.EVENTS_URI);
+
+        assertEquals("Error: The EVENTS_FOR_SEARCH_URI was matched incorrectly.", testMatcher.match(TEST_EVENTS_FOR_SEARCH_DIR), Provider.EVENTS_FOR_SEARCH_URI);
+
+        assertEquals("Error: The SEARCH_URI was matched incorrectly.", testMatcher.match(TEST_SEARCH_DIR), Provider.SEARCH_URI);
+
+        assertEquals("Error: The EVENT_FOR_DATE_AND_TITLE_URI was matched incorrectly.", testMatcher.match(TEST_EVENT_FOR_DATE_AND_TITLE_DIR), Provider.EVENT_FOR_DATE_AND_TITLE_URI);
+    }
+}

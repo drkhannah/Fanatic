@@ -33,7 +33,7 @@ public class DBHelper extends SQLiteOpenHelper {
         // Create a table to hold records of events.  _id|search_id|title|start_time|venue_name|city_name|county_name|performers|longitude|latitude|description|img_url
         final String SQL_CREATE_EVENTS_TABLE = "CREATE TABLE " + DBContract.EventsEntry.TABLE_NAME + " (" +
                 DBContract.EventsEntry._ID + " INTEGER PRIMARY KEY," +
-                DBContract.EventsEntry.SEARCH_ID + " TEXT NOT NULL, " +
+                DBContract.EventsEntry.SEARCH_ID + " INTEGER NOT NULL, " +
                 DBContract.EventsEntry.TITLE + " TEXT NOT NULL, " +
                 DBContract.EventsEntry.START_TIME + " TEXT NOT NULL, " +
                 DBContract.EventsEntry.VENUE_NAME + " TEXT NOT NULL, " +
