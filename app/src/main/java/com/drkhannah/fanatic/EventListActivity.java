@@ -100,7 +100,7 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         String category = defaultPreferences.getString(getString(R.string.pref_category_key), getString(R.string.pref_default_category));
         String location = defaultPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_default_location));
         String keyword = defaultPreferences.getString(getString(R.string.pref_keyword_key), getString(R.string.pref_default_keyword));
-        GetEventsTask getEventsTask = new GetEventsTask(EventListActivity.this, mRecyclerViewAdapter, mEmptyListTextView);
+        GetEventsTask getEventsTask = new GetEventsTask(EventListActivity.this, mEmptyListTextView);
         getEventsTask.execute(category, location, keyword);
     }
 

@@ -251,7 +251,7 @@ public class TestProvider extends AndroidTestCase {
         //create updatedValues from searchValues to replace the previously saved searchValues
         ContentValues updatedValues = new ContentValues(searchValues);
         updatedValues.put(DBContract.SearchEntry._ID, searchRowId);
-        updatedValues.put(DBContract.SearchEntry.KEYWORDS, "pop");
+        updatedValues.put(DBContract.SearchEntry.CATEGORY, "movies_film");
 
         // Create a cursor with observer to make sure that the content provider is notifying the observers
         Cursor searchCursor = mContext.getContentResolver().query(DBContract.SearchEntry.CONTENT_URI, null, null, null, null);
@@ -277,15 +277,14 @@ public class TestProvider extends AndroidTestCase {
 
         // get a cursor to see the updated record
         Cursor cursor = mContext.getContentResolver().query(
-                DBContract.EventsEntry.CONTENT_URI,
+                DBContract.SearchEntry.CONTENT_URI,
                 null,   // projection
                 DBContract.SearchEntry._ID + " = " + searchRowId,
                 null,   // Values for the "where" clause
                 null    // sort order
         );
 
-        TestUtilities.validateCursor("testUpdateSearch.  Error validating Search entry update.",
-                cursor, updatedValues);
+        TestUtilities.validateCursor("testUpdateSearch.  Error validating Search entry update.", cursor, updatedValues);
 
         cursor.close();
     }
@@ -298,6 +297,7 @@ public class TestProvider extends AndroidTestCase {
         // Register a content observer for our insert.  This time, directly with the content resolver
         TestUtilities.TestContentObserver testContentObserver = TestUtilities.getTestContentObserver();
         mContext.getContentResolver().registerContentObserver(DBContract.SearchEntry.CONTENT_URI, true, testContentObserver);
+
         Uri searchUri = mContext.getContentResolver().insert(DBContract.SearchEntry.CONTENT_URI, searchValues);
 
         // Did the content observer get called?
@@ -324,8 +324,7 @@ public class TestProvider extends AndroidTestCase {
         ContentValues eventValues = TestUtilities.createEventValues(searchRowId);
         // The TestContentObserver is a one-shot class
         testContentObserver = TestUtilities.getTestContentObserver();
-
-        mContext.getContentResolver().registerContentObserver(DBContract.SearchEntry.CONTENT_URI, true, testContentObserver);
+        mContext.getContentResolver().registerContentObserver(DBContract.EventsEntry.CONTENT_URI, true, testContentObserver);
 
         Uri eventInsertUri = mContext.getContentResolver().insert(DBContract.EventsEntry.CONTENT_URI, eventValues);
         assertTrue(eventInsertUri != null);

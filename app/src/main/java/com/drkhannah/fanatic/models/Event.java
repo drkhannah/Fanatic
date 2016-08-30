@@ -3,8 +3,6 @@ package com.drkhannah.fanatic.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.List;
-
 /**
  * Created by dhannah on 8/23/16.
  */
@@ -15,13 +13,13 @@ public class Event implements Parcelable{
     private String mVenueName;
     private String mCityName;
     private String mCountryName;
-    private List<String> mPerformers;
+    private String mPerformers;
     private String mLongitude;
     private String mLatitude;
     private String mDescription;
     private String mImageUrl;
 
-    public Event(String title, String startTime, String venueName, String cityName, String countryName, List<String> performers, String longitude, String latitude, String description, String imageUrl) {
+    public Event(String title, String startTime, String venueName, String cityName, String countryName, String performers, String longitude, String latitude, String description, String imageUrl) {
         mTitle = title;
         mStartTime = startTime;
         mVenueName = venueName;
@@ -41,7 +39,7 @@ public class Event implements Parcelable{
         mVenueName = in.readString();
         mCityName = in.readString();
         mCountryName = in.readString();
-        mPerformers = in.createStringArrayList();
+        mPerformers = in.readString();
         mLongitude = in.readString();
         mLatitude = in.readString();
         mDescription = in.readString();
@@ -55,7 +53,7 @@ public class Event implements Parcelable{
         dest.writeString(mVenueName);
         dest.writeString(mCityName);
         dest.writeString(mCountryName);
-        dest.writeStringList(mPerformers);
+        dest.writeString(mPerformers);
         dest.writeString(mLongitude);
         dest.writeString(mLatitude);
         dest.writeString(mDescription);
@@ -100,7 +98,7 @@ public class Event implements Parcelable{
         return mCountryName;
     }
 
-    public List<String> getPerformers() {
+    public String getPerformers() {
         return mPerformers;
     }
 

@@ -45,7 +45,7 @@ public class Provider extends ContentProvider {
     private Cursor getEventsForSearch(Uri uri, String[] projection, String sortOrder) {
         long searchIdFromUri = DBContract.EventsEntry.getSearchIdFromUri(uri);
 
-        String[] selectionArgs = new String[]{String.valueOf(searchIdFromUri)};
+        String[] selectionArgs = new String[]{Long.toString(searchIdFromUri)};
         String selection = sSearchSelection;
 
         return sEventsBySearchQueryBuilder.query(mDBHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
@@ -59,7 +59,7 @@ public class Provider extends ContentProvider {
         String startTimeFromUri = DBContract.EventsEntry.getStartTimeFromUri(uri);
         String titleFromUri = DBContract.EventsEntry.getTitleFromUri(uri);
 
-        String[] selectionArgs = new String[]{String.valueOf(searchIdFromUri), startTimeFromUri, titleFromUri};
+        String[] selectionArgs = new String[]{Long.toString(searchIdFromUri), startTimeFromUri, titleFromUri};
         String selection = sSearchAndDateSelection;
 
         return sEventsBySearchQueryBuilder.query(mDBHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);

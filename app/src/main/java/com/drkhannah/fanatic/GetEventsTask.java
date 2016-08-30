@@ -1,13 +1,15 @@
 package com.drkhannah.fanatic;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
 
-import com.drkhannah.fanatic.adapters.RecyclerViewAdapter;
-import com.drkhannah.fanatic.models.Event;
+import com.drkhannah.fanatic.data.DBContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,27 +26,23 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Created by dhannah on 8/23/16.
  */
-public class GetEventsTask extends AsyncTask<String, Integer, List<Event>> {
+public class GetEventsTask extends AsyncTask<String, Void, Void> {
 
     private final String LOG_TAG = GetEventsTask.class.getSimpleName();
 
     private Context mContext;
-    private RecyclerViewAdapter mRecyclerViewAdapter;
     private TextView mEmptyListTextView;
 
-    public GetEventsTask(Context context, RecyclerViewAdapter recyclerViewAdapter, TextView emptyListTextView) {
+    public GetEventsTask(Context context, TextView emptyListTextView) {
         mContext = context;
-        mRecyclerViewAdapter = recyclerViewAdapter;
         mEmptyListTextView = emptyListTextView;
     }
 
-    /* The date/time conversion code is going to be moved outside the asynctask later,
-         * so for convenience we're breaking it out into its own method now.
-         */
     private String getReadableDateString(String time) {
         // format the start_time that was returned from json
         Date date = null;
@@ -56,9 +54,48 @@ public class GetEventsTask extends AsyncTask<String, Integer, List<Event>> {
         return new SimpleDateFormat("MM-dd-yyy h:mm").format(date);
     }
 
-    private List<Event> parseJson(String responseString) throws JSONException {
+    //add a search to the database, or retrieve a search from the database
+    long addSearch(String category, String location, String keywords) {
+        long searchId;
 
-        List<Event> eventsList = new ArrayList<>();
+        // First, check if a search with this category, location, and keywords exists in the database
+        Cursor searchCursor = mContext.getContentResolver().query(
+                DBContract.SearchEntry.CONTENT_URI,
+                new String[]{DBContract.SearchEntry._ID},
+                DBContract.SearchEntry.CATEGORY + " = ? AND " + DBContract.SearchEntry.LOCATION + " = ? AND " + DBContract.SearchEntry.KEYWORDS + " = ? ",
+                new String[]{category, location, keywords},
+                null);
+
+        if (searchCursor.moveToFirst()) {
+            int searchIdIndex = searchCursor.getColumnIndex(DBContract.SearchEntry._ID);
+            searchId = searchCursor.getLong(searchIdIndex);
+        } else {
+            // Now that the content provider is set up, inserting rows of data is pretty simple.
+            // First create a ContentValues object to hold the data you want to insert.
+            ContentValues searchValues = new ContentValues();
+
+            // Then add the data, along with the corresponding name of the data type,
+            // so the content provider knows what kind of value is being inserted.
+            searchValues.put(DBContract.SearchEntry.CATEGORY, category);
+            searchValues.put(DBContract.SearchEntry.LOCATION, location);
+            searchValues.put(DBContract.SearchEntry.KEYWORDS, keywords);
+
+            // Finally, insert search data into the database.
+            Uri insertedUri = mContext.getContentResolver().insert(
+                    DBContract.SearchEntry.CONTENT_URI,
+                    searchValues
+            );
+
+            // The resulting URI contains the ID for the row.  Extract the searchId from the Uri.
+            searchId = ContentUris.parseId(insertedUri);
+        }
+
+        searchCursor.close();
+        // Wait, that worked?  Yes!
+        return searchId;
+    }
+
+    private Void parseJson(String responseString, String category, String location, String keywords) throws JSONException {
 
         //these are the properties that we need to get from the JSON response
         final String EVENTS = "events";
@@ -78,13 +115,19 @@ public class GetEventsTask extends AsyncTask<String, Integer, List<Event>> {
         final String IMAGE_URL = "url";
         final String DESCRIPTION = "description";
 
+        long searchId = addSearch(category, location, keywords);
+
         //get to the event array in the responseString
         JSONObject eventsJson = new JSONObject(responseString);
         JSONObject events = eventsJson.optJSONObject(EVENTS);
         if (events != null) {
             JSONArray eventArray = events.optJSONArray(EVENT);
+
             if (eventArray != null) {
-                //loop through events and create a List<Event>
+                //Vector of Content Values that will be inserted into the events table of the database
+                Vector<ContentValues> valuesVector = new Vector<ContentValues>(eventArray.length());
+
+                //loop through events
                 if (eventArray.length() > 0) {
                     for (int i = 0; i < eventArray.length(); i++) {
                         JSONObject jsonEvent = eventArray.getJSONObject(i);
@@ -92,12 +135,12 @@ public class GetEventsTask extends AsyncTask<String, Integer, List<Event>> {
                         //event info we want to extra from json
                         String title = jsonEvent.getString(TITLE);
                         String startTime = getReadableDateString(jsonEvent.getString(START_TIME));
-                        String venuName = jsonEvent.getString(VENUE_NAME);
+                        String venueName = jsonEvent.getString(VENUE_NAME);
                         String cityName = jsonEvent.getString(CITY_NAME);
                         String countryName = jsonEvent.getString(COUNTRY_NAME);
                         String longitude = jsonEvent.getString(LONGITUDE);
                         String latitude = jsonEvent.getString(LATITUDE);
-                        String description = jsonEvent.getString(DESCRIPTION);
+                        String description = android.text.Html.fromHtml(jsonEvent.getString(DESCRIPTION)).toString();
 
                         //loop through performers to find all performers
                         List<String> performers = new ArrayList<>();
@@ -115,25 +158,49 @@ public class GetEventsTask extends AsyncTask<String, Integer, List<Event>> {
 
                         //get image url
                         JSONObject jsonImage = jsonEvent.optJSONObject(IMAGE);
-                        String jsonImageUrl;
+                        String imageUrl;
                         if (jsonImage != null) {
-                            JSONObject jsonImageSize = jsonImage.getJSONObject(IMAGE_SIZE);
-                            jsonImageUrl = jsonImageSize.getString(IMAGE_URL);
+                            JSONObject jsonImageSmall = jsonImage.optJSONObject(IMAGE_SIZE);
+                            imageUrl = jsonImageSmall.optString(IMAGE_URL);
                         } else {
-                            jsonImageUrl = null;
+                            imageUrl= null;
                         }
 
-                        Event event = new Event(title, startTime, venuName, cityName, countryName, performers, longitude, latitude, description, jsonImageUrl);
-                        eventsList.add(event);
+                        //create ContentValues for this event
+                        ContentValues eventValues = new ContentValues();
+                        eventValues.put(DBContract.EventsEntry.SEARCH_ID, searchId);
+                        eventValues.put(DBContract.EventsEntry.TITLE, title);
+                        eventValues.put(DBContract.EventsEntry.START_TIME, startTime);
+                        eventValues.put(DBContract.EventsEntry.VENUE_NAME, venueName);
+                        eventValues.put(DBContract.EventsEntry.CITY_NAME, cityName);
+                        eventValues.put(DBContract.EventsEntry.COUNTRY_NAME, countryName);
+                        eventValues.put(DBContract.EventsEntry.PERFORMERS, performers.toString());
+                        eventValues.put(DBContract.EventsEntry.LONGITUDE, longitude);
+                        eventValues.put(DBContract.EventsEntry.LATITUDE, latitude);
+                        eventValues.put(DBContract.EventsEntry.DESCRIPTION, description);
+                        eventValues.put(DBContract.EventsEntry.IMG_URL, imageUrl);
+
+                        //add the eventValues to the Vector<ContentValues>
+                        valuesVector.add(eventValues);
                     }
                 }
+                //bulk insert valuesVector into the events table of the database
+                int inserted = 0;
+                if (valuesVector.size() > 0) {
+                    ContentValues[] cvArray = new ContentValues[valuesVector.size()];
+                    valuesVector.toArray(cvArray);
+                    inserted = mContext.getContentResolver().bulkInsert(DBContract.EventsEntry.CONTENT_URI, cvArray);
+                }
+
+                Log.d(LOG_TAG, "GetEventsTask Complete. " + inserted + " Inserted");
             }
         }
-        return eventsList;
+        return null;
     }
 
+
     @Override
-    protected List<Event> doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
 
         String eventsJsonString = null;
 
@@ -215,23 +282,11 @@ public class GetEventsTask extends AsyncTask<String, Integer, List<Event>> {
             }
         }
         try {
-            return parseJson(eventsJsonString);
+            return parseJson(eventsJsonString, CATEGORY_TO_SEARCH, LOCATION_TO_SEARCH, KEYWORDS_TO_SEARCH);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return null;
-    }
-
-    @Override
-    protected void onPostExecute(List<Event> result) {
-        super.onPostExecute(result);
-        if (result.size() != 0) {
-            mRecyclerViewAdapter.swapData(result);
-            mEmptyListTextView.setText(null);
-        } else {
-            mEmptyListTextView.setText(R.string.no_events_returned_label);
-            mRecyclerViewAdapter.swapData(null);
-        }
     }
 }
