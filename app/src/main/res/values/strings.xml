@@ -15,7 +15,7 @@
     <string name="pref_location_title">Location</string>
     <string name="pref_location_key" translatable="false">location</string>
     <string name="pref_default_location" translatable="false">44107</string>
-    <string name="pref_category_key">category</string>
+    <string name="pref_category_key" translatable="false">category</string>
     <string name="perf_category_title">Category</string>
     <string name="dialog_title_perf_category">Event Category</string>
     <string name="settings_toolbar_title">Settings</string>
@@ -23,9 +23,11 @@
     <string name="prompt_search_events">Search for Events</string>
     <string name="hint_search_by_keyword">Search By Keyword</string>
     <string name="menu_title_search_keywords">Search Keywords</string>
-    <string name="pref_keyword_key">keyword</string>
+    <string name="pref_keyword_key" translatable="false">keywords</string>
     <string name="label_search_activity">Search Activity</string>
     <string name="pref_default_keyword">rock</string>
     <string name="pref_default_category">music</string>
-    <string name="last_search_id">last_search_id</string>
+    <string name="last_search_id" translatable="false">last_search_id</string>
+    <string name="no_event_description">no description</string>
+    <string name="null_string" translatable="false">null</string>
 </resources>

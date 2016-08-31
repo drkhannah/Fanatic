@@ -38,8 +38,14 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
     private String mTitle;
     private String mStartTime;
 
+    private TextView mTitleTextView;
+    private TextView mStartTimeTextView;
+    private TextView mVenueNameTextView;
     private TextView mDescriptionTextView;
+    private TextView mPerformersTextView;
+
     private ImageView mEventImageView;
+
     private CollapsingToolbarLayout mAppBarLayout;
 
     private static final int DETAIL_LOADER = 2;
@@ -57,8 +63,6 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
 
         Activity activity = this.getActivity();
         mAppBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-        mEventImageView = (ImageView) activity.findViewById(R.id.event_thumb_imageview);
-
 
         if (getArguments().containsKey(SEARCH_ID_ARG)) {
             mSearchId = getArguments().getLong(SEARCH_ID_ARG);
@@ -72,11 +76,16 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.event_detail, container, false);
 
-        mDescriptionTextView = (TextView) rootView.findViewById(R.id.event_detail);
+        mEventImageView = (ImageView) rootView.findViewById(R.id.event_imageview);
+
+        mTitleTextView = (TextView) rootView.findViewById(R.id.detail_title_textview);
+        mStartTimeTextView = (TextView) rootView.findViewById(R.id.detail_start_time_textview);
+        mVenueNameTextView = (TextView) rootView.findViewById(R.id.detail_venue_name_textview);
+        mDescriptionTextView = (TextView) rootView.findViewById(R.id.detail_description_textview);
+        mPerformersTextView = (TextView) rootView.findViewById(R.id.detail_performers_textview);
 
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
 
@@ -94,20 +103,37 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor.moveToFirst()) {
-            String title = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.TITLE));
-            String description = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.DESCRIPTION));
+            final String title = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.TITLE));
+            final String startTime = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.START_TIME));
+            final String venueName = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.VENUE_NAME));
+            final String description = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.DESCRIPTION));
+            final String performers = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.PERFORMERS));
             final String imageUrl = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.IMG_URL));
 
-            mDescriptionTextView.setText(description);
             if (mAppBarLayout != null) {
                 mAppBarLayout.setTitle(title);
+            } else {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        mTitleTextView.setText(title);
                         Picasso.with(getContext()).load(imageUrl).into(mEventImageView);
                     }
                 });
             }
+
+            mStartTimeTextView.setText(startTime);
+            mVenueNameTextView.setText(venueName);
+
+            if (!description.equalsIgnoreCase(getActivity().getString(R.string.null_string))) {
+                mDescriptionTextView.setText(description);
+            }
+
+            if (!performers.equalsIgnoreCase(getActivity().getString(R.string.null_string))) {
+                mPerformersTextView.setText(performers);
+            }
+
+
         }
     }
 

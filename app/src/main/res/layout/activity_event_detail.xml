@@ -21,12 +21,8 @@
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:toolbarId="@+id/toolbar">
-
-            <ImageView
-                android:id="@+id/event_thumb_imageview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+            app:toolbarId="@+id/detail_toolbar"
+            >
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/detail_toolbar"

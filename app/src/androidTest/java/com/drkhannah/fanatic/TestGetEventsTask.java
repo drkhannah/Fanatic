@@ -34,7 +34,7 @@ public class TestGetEventsTask extends AndroidTestCase{
                 DBContract.SearchEntry.CATEGORY + " = ? AND " + DBContract.SearchEntry.LOCATION + " = ? AND " + DBContract.SearchEntry.KEYWORDS + " = ? ",
                 new String[]{ADD_SEARCH_CATEGORY, ADD_SEARCH_LOCATION, ADD_SEARCH_KEYWORDS});
 
-        GetEventsTask getEventsTask = new GetEventsTask(getContext(), null);
+        GetEventsTask getEventsTask = new GetEventsTask(getContext());
         long searchId = getEventsTask.addSearch(ADD_SEARCH_CATEGORY, ADD_SEARCH_LOCATION, ADD_SEARCH_KEYWORDS);
 
         // does addSearch return a valid record ID?

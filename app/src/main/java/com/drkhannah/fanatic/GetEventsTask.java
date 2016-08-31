@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.v4.app.LoaderManager;
 import android.util.Log;
 
 import com.drkhannah.fanatic.data.DBContract;
@@ -38,11 +37,9 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
     private final String LOG_TAG = GetEventsTask.class.getSimpleName();
 
     private Context mContext;
-    private LoaderManager mLoaderManager;
 
-    public GetEventsTask(Context context, LoaderManager loaderManager) {
+    public GetEventsTask(Context context) {
         mContext = context;
-        mLoaderManager = loaderManager;
     }
 
     private String getReadableDateString(String time) {
@@ -116,7 +113,7 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
         final String LONGITUDE = "longitude";
         final String LATITUDE = "latitude";
         final String IMAGE = "image";
-        final String IMAGE_SIZE = "small";
+        final String IMAGE_SIZE = "medium";
         final String IMAGE_URL = "url";
         final String DESCRIPTION = "description";
 
@@ -179,7 +176,7 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
                         eventValues.put(DBContract.EventsEntry.VENUE_NAME, venueName);
                         eventValues.put(DBContract.EventsEntry.CITY_NAME, cityName);
                         eventValues.put(DBContract.EventsEntry.COUNTRY_NAME, countryName);
-                        eventValues.put(DBContract.EventsEntry.PERFORMERS, performers.toString());
+                        eventValues.put(DBContract.EventsEntry.PERFORMERS, performers.toString().replace("[", "").replace("]", ""));
                         eventValues.put(DBContract.EventsEntry.LONGITUDE, longitude);
                         eventValues.put(DBContract.EventsEntry.LATITUDE, latitude);
                         eventValues.put(DBContract.EventsEntry.DESCRIPTION, description);

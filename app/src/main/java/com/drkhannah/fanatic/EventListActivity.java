@@ -100,13 +100,6 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
     @Override
     protected void onResume() {
         super.onResume();
-        //read location from DefaultSharedPreferences
-        SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(EventListActivity.this);
-        String category = defaultPreferences.getString(getString(R.string.pref_category_key), getString(R.string.pref_default_category));
-        String location = defaultPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_default_location));
-        String keyword = defaultPreferences.getString(getString(R.string.pref_keyword_key), getString(R.string.pref_default_keyword));
-        GetEventsTask getEventsTask = new GetEventsTask(EventListActivity.this, getSupportLoaderManager());
-        getEventsTask.execute(category, location, keyword);
     }
 
     /**
@@ -168,6 +161,13 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         if (cursor.getCount() != 0) {
             mRecyclerViewAdapter.swapCursor(cursor);
             mEmptyListTextView.setText(null);
+        } else {
+            //read from DefaultSharedPreferences
+            SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(EventListActivity.this);
+            String category = defaultPreferences.getString(getString(R.string.pref_category_key), getString(R.string.pref_default_category));
+            String location = defaultPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_default_location));
+            String keywords = defaultPreferences.getString(getString(R.string.pref_keyword_key), getString(R.string.pref_default_keyword));
+            EventIntentService.startActionGetEvents(this, category, location, keywords);
         }
     }
 

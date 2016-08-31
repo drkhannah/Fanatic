@@ -96,8 +96,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             super(view);
             mView = view;
             mEventTitleTextView = (TextView) view.findViewById(R.id.event_title_textview);
-            mStartTimeTextView = (TextView) view.findViewById(R.id.start_time_textview);
-            mVenueNameTextView = (TextView) view.findViewById(R.id.venue_name_textview);
+            mStartTimeTextView = (TextView) view.findViewById(R.id.detail_start_time_textview);
+            mVenueNameTextView = (TextView) view.findViewById(R.id.detail_venue_name_textview);
         }
 
         @Override
