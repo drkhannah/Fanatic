@@ -3,11 +3,13 @@ package com.drkhannah.fanatic;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
+import android.support.v4.app.LoaderManager;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.drkhannah.fanatic.data.DBContract;
 
@@ -36,11 +38,11 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
     private final String LOG_TAG = GetEventsTask.class.getSimpleName();
 
     private Context mContext;
-    private TextView mEmptyListTextView;
+    private LoaderManager mLoaderManager;
 
-    public GetEventsTask(Context context, TextView emptyListTextView) {
+    public GetEventsTask(Context context, LoaderManager loaderManager) {
         mContext = context;
-        mEmptyListTextView = emptyListTextView;
+        mLoaderManager = loaderManager;
     }
 
     private String getReadableDateString(String time) {
@@ -91,7 +93,10 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
         }
 
         searchCursor.close();
-        // Wait, that worked?  Yes!
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        sharedPref.edit().putLong(mContext.getString(R.string.last_search_id), searchId).commit();
+
         return searchId;
     }
 
