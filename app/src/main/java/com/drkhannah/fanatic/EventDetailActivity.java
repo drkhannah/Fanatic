@@ -53,7 +53,9 @@ public class EventDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putLong(EventDetailFragment.SEARCH_ID_ARG, getIntent().getLongExtra(EventDetailFragment.SEARCH_ID_ARG, 0));
+            arguments.putString(EventDetailFragment.CATEGORY_ARG, getIntent().getStringExtra(EventDetailFragment.CATEGORY_ARG));
+            arguments.putString(EventDetailFragment.LOCATION_ARG, getIntent().getStringExtra(EventDetailFragment.LOCATION_ARG));
+            arguments.putString(EventDetailFragment.KEYWORDS_ARG, getIntent().getStringExtra(EventDetailFragment.KEYWORDS_ARG));
             arguments.putString(EventDetailFragment.START_TIME_ARG, getIntent().getStringExtra(EventDetailFragment.START_TIME_ARG));
             arguments.putString(EventDetailFragment.TITLE_ARG, getIntent().getStringExtra(EventDetailFragment.TITLE_ARG));
             EventDetailFragment fragment = new EventDetailFragment();

@@ -48,7 +48,7 @@ public class SearchActivity extends AppCompatActivity {
                 //save search string in shared preferences
                 //finish the search activity
                 SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                sharedPref.edit().putString(getString(R.string.pref_keyword_key), keyword.toLowerCase().trim()).commit();
+                sharedPref.edit().putString(getString(R.string.pref_keywords_key), keyword.toLowerCase().trim()).commit();
                 mSearchView.clearFocus();
                 finish();
                 return true;

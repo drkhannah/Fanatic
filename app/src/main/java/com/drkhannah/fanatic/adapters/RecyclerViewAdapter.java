@@ -38,7 +38,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        final long search_id = mCursor.getLong(mCursor.getColumnIndexOrThrow(DBContract.EventsEntry.SEARCH_ID));
+        final String category = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.SearchEntry.CATEGORY));
+        final String location = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.SearchEntry.LOCATION));
+        final String keywords = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.SearchEntry.KEYWORDS));
         final String title = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.EventsEntry.TITLE));
         final String startTime = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.EventsEntry.START_TIME));
         String venueName = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.EventsEntry.VENUE_NAME));
@@ -52,7 +54,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             public void onClick(View v) {
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putLong(EventDetailFragment.SEARCH_ID_ARG, search_id);
+                    arguments.putString(EventDetailFragment.CATEGORY_ARG, category);
+                    arguments.putString(EventDetailFragment.LOCATION_ARG, location);
+                    arguments.putString(EventDetailFragment.KEYWORDS_ARG, keywords);
                     arguments.putString(EventDetailFragment.TITLE_ARG, title);
                     arguments.putString(EventDetailFragment.START_TIME_ARG, startTime);
                     EventDetailFragment fragment = new EventDetailFragment();
@@ -63,7 +67,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 } else {
                     Context context = v.getContext();
                     Intent intent = new Intent(context, EventDetailActivity.class);
-                    intent.putExtra(EventDetailFragment.SEARCH_ID_ARG, search_id);
+                    intent.putExtra(EventDetailFragment.CATEGORY_ARG, category);
+                    intent.putExtra(EventDetailFragment.LOCATION_ARG, location);
+                    intent.putExtra(EventDetailFragment.KEYWORDS_ARG, keywords);
                     intent.putExtra(EventDetailFragment.TITLE_ARG, title);
                     intent.putExtra(EventDetailFragment.START_TIME_ARG, startTime);
                     context.startActivity(intent);

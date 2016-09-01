@@ -39,27 +39,31 @@ public class Provider extends ContentProvider {
                         "." + DBContract.SearchEntry._ID);
     }
 
-    //search._id = ?
-    private static final String sSearchSelection = DBContract.SearchEntry.TABLE_NAME + "." + DBContract.SearchEntry._ID + " = ? ";
+    //search.category = ? AND location = ? and keywords = ?
+    private static final String sSearchSelection = DBContract.SearchEntry.TABLE_NAME + "." + DBContract.SearchEntry.CATEGORY + " = ? AND " + DBContract.SearchEntry.LOCATION + " = ? AND " + DBContract.SearchEntry.KEYWORDS + " = ? ";
 
     private Cursor getEventsForSearch(Uri uri, String[] projection, String sortOrder) {
-        long searchIdFromUri = DBContract.EventsEntry.getSearchIdFromUri(uri);
+        String searchCategory = DBContract.EventsEntry.getCategoryFromUri(uri);
+        String searchLocation = DBContract.EventsEntry.getLocationFromUri(uri);
+        String searchKeywords = DBContract.EventsEntry.getKeywordsFromUri(uri);
 
-        String[] selectionArgs = new String[]{Long.toString(searchIdFromUri)};
+        String[] selectionArgs = new String[]{searchCategory, searchLocation, searchKeywords};
         String selection = sSearchSelection;
 
         return sEventsBySearchQueryBuilder.query(mDBHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
     }
 
-    //search._id = ? AND start_time = ? AND title = ?
-    private static final String sSearchAndDateSelection = DBContract.SearchEntry.TABLE_NAME + "." + DBContract.SearchEntry._ID + " = ? AND " + DBContract.EventsEntry.START_TIME + " = ? AND " + DBContract.EventsEntry.TITLE + " = ? ";
+    //search.category = ? AND search.location = ? and search.keywords = ? AND event.start_time = ? AND event.title = ?
+    private static final String sSearchAndDateSelection = DBContract.SearchEntry.TABLE_NAME + "." + DBContract.SearchEntry.CATEGORY + " = ? AND " + DBContract.SearchEntry.LOCATION + " = ? AND " + DBContract.SearchEntry.KEYWORDS + " = ? AND "+ DBContract.EventsEntry.START_TIME + " = ? AND " + DBContract.EventsEntry.TITLE + " = ? ";
 
     private Cursor getEventsForSearchWithDateAndTitle(Uri uri, String[] projection, String sortOrder) {
-        long searchIdFromUri = DBContract.EventsEntry.getSearchIdFromUri(uri);
+        String categoryFromUri = DBContract.EventsEntry.getCategoryFromUri(uri);
+        String locationFromUri = DBContract.EventsEntry.getLocationFromUri(uri);
+        String keywordsFromUri = DBContract.EventsEntry.getKeywordsFromUri(uri);
         String startTimeFromUri = DBContract.EventsEntry.getStartTimeFromUri(uri);
         String titleFromUri = DBContract.EventsEntry.getTitleFromUri(uri);
 
-        String[] selectionArgs = new String[]{Long.toString(searchIdFromUri), startTimeFromUri, titleFromUri};
+        String[] selectionArgs = new String[]{categoryFromUri, locationFromUri, keywordsFromUri, startTimeFromUri, titleFromUri};
         String selection = sSearchAndDateSelection;
 
         return sEventsBySearchQueryBuilder.query(mDBHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
@@ -73,8 +77,8 @@ public class Provider extends ContentProvider {
         //Each Uri needs a unique code
         matcher.addURI(authority, DBContract.PATH_SEARCH, SEARCH_URI);
         matcher.addURI(authority, DBContract.PATH_EVENTS, EVENTS_URI);
-        matcher.addURI(authority, DBContract.PATH_EVENTS + "/#", EVENTS_FOR_SEARCH_URI);
-        matcher.addURI(authority, DBContract.PATH_EVENTS + "/#/*/*", EVENT_FOR_DATE_AND_TITLE_URI);
+        matcher.addURI(authority, DBContract.PATH_EVENTS + "/*/*/*", EVENTS_FOR_SEARCH_URI);
+        matcher.addURI(authority, DBContract.PATH_EVENTS + "/*/*/*/*/*", EVENT_FOR_DATE_AND_TITLE_URI);
 
         return matcher;
     }

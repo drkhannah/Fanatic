@@ -1,11 +1,9 @@
 package com.drkhannah.fanatic;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -19,6 +17,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -26,6 +25,7 @@ import android.widget.TextView;
 import com.drkhannah.fanatic.adapters.RecyclerViewAdapter;
 import com.drkhannah.fanatic.data.DBContract;
 import com.drkhannah.fanatic.settings.SettingsActivity;
+import com.drkhannah.fanatic.sync.SyncAdapter;
 
 /**
  * An activity representing a list of Event. This activity
@@ -36,6 +36,8 @@ import com.drkhannah.fanatic.settings.SettingsActivity;
  * item details side-by-side using two vertical panes.
  */
 public class EventListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final String LOG_TAG = EventListActivity.class.getSimpleName();
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -92,20 +94,20 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
 
         mEmptyListTextView = (TextView) findViewById(R.id.empty_events_textview);
         mEmptyListTextView.setText(R.string.prompt_search_events);
-
-        //init cursorLoader
-        getSupportLoaderManager().initLoader(EVENTS_LOADER, null, this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        getSupportLoaderManager().restartLoader(EVENTS_LOADER, null, this);
+        SyncAdapter.initSyncAdapter(this);
     }
 
     /**
      * Take care of popping the fragment back stack or finishing the activity
      * as appropriate.
      */
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -145,15 +147,12 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(EventListActivity.this);
-        long searchId = defaultPreferences.getLong(getString(R.string.last_search_id), 0);
-        if (searchId == 0) {
-            searchId = 1;
-        }
+        String category = Utils.getCategoryFromSharedPref(this);
+        String location = Utils.getLocationFromSharedPref(this);
+        String keywords = Utils.getKeywordsFromSharedPref(this);
         String sortOrder = DBContract.EventsEntry.START_TIME + " ASC";
-        Uri searchForArtistUri = DBContract.EventsEntry.buildEventListForSearchUri(searchId);
-        return new CursorLoader(EventListActivity.this, searchForArtistUri, null, null, null, sortOrder);
-
+        Uri eventsForSearchUri = DBContract.EventsEntry.buildEventListForSearchUri(category, location, keywords);
+        return new CursorLoader(EventListActivity.this, eventsForSearchUri, null, null, null, sortOrder);
     }
 
     @Override
@@ -162,12 +161,10 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
             mRecyclerViewAdapter.swapCursor(cursor);
             mEmptyListTextView.setText(null);
         } else {
-            //read from DefaultSharedPreferences
-            SharedPreferences defaultPreferences = PreferenceManager.getDefaultSharedPreferences(EventListActivity.this);
-            String category = defaultPreferences.getString(getString(R.string.pref_category_key), getString(R.string.pref_default_category));
-            String location = defaultPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_default_location));
-            String keywords = defaultPreferences.getString(getString(R.string.pref_keyword_key), getString(R.string.pref_default_keyword));
-            EventIntentService.startActionGetEvents(this, category, location, keywords);
+            Log.d(LOG_TAG, "cursor returned 0");
+            if (SyncAdapter.sSyncedNewAccount) {
+                SyncAdapter.syncNow(this);
+            }
         }
     }
 

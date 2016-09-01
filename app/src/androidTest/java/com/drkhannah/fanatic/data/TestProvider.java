@@ -86,7 +86,7 @@ public class TestProvider extends AndroidTestCase {
                     providerInfo.authority, DBContract.CONTENT_AUTHORITY);
         } catch (PackageManager.NameNotFoundException e) {
             // I guess the provider isn't registered correctly.
-            assertTrue("Error:ConcertsContractProvider not registered at " + mContext.getPackageName(),
+            assertTrue("Error: Provider not registered at " + mContext.getPackageName(),
                     false);
         }
     }
@@ -97,9 +97,11 @@ public class TestProvider extends AndroidTestCase {
         // vnd.android.cursor.dir/com.drkhannah.fanatic.provider/events/
         assertEquals("Error: the EventsEntry CONTENT_URI should return DBContract.EventsEntry.CONTENT_TYPE", DBContract.EventsEntry.CONTENT_TYPE, type);
 
-        long testSearchId = 1;
+        String testCategory = "music";
+        String testLocation = "44017";
+        String testKeywords = "rock";
         // content://com.drkhannah.fanatic.provider/events/*
-        type = mContext.getContentResolver().getType(DBContract.EventsEntry.buildEventListForSearchUri(testSearchId));
+        type = mContext.getContentResolver().getType(DBContract.EventsEntry.buildEventListForSearchUri(testCategory, testLocation, testKeywords));
 
         // vnd.android.cursor.dir/com.drkhannah.fanatic.provider/events
         assertEquals("Error: the EventsEntry CONTENT_URI with searchId should return EventsEntry.CONTENT_TYPE", DBContract.EventsEntry.CONTENT_TYPE, type);
@@ -107,7 +109,7 @@ public class TestProvider extends AndroidTestCase {
         String testDate = "9:00";
         String testTitle = "Title";
         // content://com.drkhannah.fanatic.provider/events/*/*/*
-        type = mContext.getContentResolver().getType(DBContract.EventsEntry.buildEventListForSearchWithDateAndTitleUri(testSearchId, testDate, testTitle));
+        type = mContext.getContentResolver().getType(DBContract.EventsEntry.buildEventForSearchWithDateAndTitleUri(testCategory, testLocation, testKeywords, testDate, testTitle));
 
         // vnd.android.cursor.dir/com.drkhannah.fanatic.provider/events
         assertEquals("Error: the EventEntry CONTENT_URI with searchId, date, and title  should return EventsEntry.CONTENT_ITEM_TYPE", DBContract.EventsEntry.CONTENT_ITEM_TYPE, type);
@@ -125,6 +127,11 @@ public class TestProvider extends AndroidTestCase {
         assertEquals(true, db.isOpen());
 
         ContentValues testValues = TestUtilities.createSearchValues();
+        String category = testValues.getAsString(DBContract.SearchEntry.CATEGORY);
+        String location = testValues.getAsString(DBContract.SearchEntry.LOCATION);
+        String keywords = testValues.getAsString(DBContract.SearchEntry.KEYWORDS);
+
+
         long searchRowId = TestUtilities.insertTestSearchValues(mContext);
 
         // Fantastic.  Now that we have a searchId, add some events!
@@ -137,7 +144,7 @@ public class TestProvider extends AndroidTestCase {
 
         // Test the basic content provider query
         Cursor eventsCursor = mContext.getContentResolver().query(
-                DBContract.EventsEntry.buildEventListForSearchUri(searchRowId),
+                DBContract.EventsEntry.buildEventListForSearchUri(category, location, keywords),
                 null,
                 null,
                 null,
@@ -155,6 +162,9 @@ public class TestProvider extends AndroidTestCase {
         assertEquals(true, db.isOpen());
 
         ContentValues testValues = TestUtilities.createSearchValues();
+        String category = testValues.getAsString(DBContract.SearchEntry.CATEGORY);
+        String location = testValues.getAsString(DBContract.SearchEntry.LOCATION);
+        String keywords = testValues.getAsString(DBContract.SearchEntry.KEYWORDS);
         long searchRowId = TestUtilities.insertTestSearchValues(mContext);
 
         // have a searchId, add some events!
@@ -169,7 +179,7 @@ public class TestProvider extends AndroidTestCase {
 
         // Test the basic content provider query
         Cursor eventsCursor = mContext.getContentResolver().query(
-                DBContract.EventsEntry.buildEventListForSearchWithDateAndTitleUri(searchRowId, testDate, testTitle),
+                DBContract.EventsEntry.buildEventForSearchWithDateAndTitleUri(category, location, keywords, testDate, testTitle),
                 null,
                 null,
                 null,
@@ -293,6 +303,9 @@ public class TestProvider extends AndroidTestCase {
     // Make sure we can still delete after adding/updating stuff
     public void testInsertReadProvider() {
         ContentValues searchValues = TestUtilities.createSearchValues();
+        String category = searchValues.getAsString(DBContract.SearchEntry.CATEGORY);
+        String location = searchValues.getAsString(DBContract.SearchEntry.LOCATION);
+        String keywords = searchValues.getAsString(DBContract.SearchEntry.KEYWORDS);
 
         // Register a content observer for our insert.  This time, directly with the content resolver
         TestUtilities.TestContentObserver testContentObserver = TestUtilities.getTestContentObserver();
@@ -350,7 +363,7 @@ public class TestProvider extends AndroidTestCase {
 
         // Get the joined Event and Search data
         eventCursor = mContext.getContentResolver().query(
-                DBContract.EventsEntry.buildEventListForSearchUri(searchRowId),
+                DBContract.EventsEntry.buildEventListForSearchUri(category, location, keywords),
                 null, // leaving "columns" null just returns all the columns.
                 null, // cols for "where" clause
                 null, // values for "where" clause

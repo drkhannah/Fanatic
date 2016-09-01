@@ -2,8 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.drkhannah.fanatic">
 
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
     <uses-permission android:name="com.drkhannah.fanatic.provider.READWRITE"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_SYNC_STATS"/>
 
     <application
         android:allowBackup="true"
@@ -68,6 +72,26 @@
         <service
             android:name=".EventIntentService"
             android:exported="false">
+        </service>
+
+        <service
+            android:name="com.drkhannah.fanatic.sync.AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <service android:name=".sync.SyncService"
+                 android:exported="true">
+        <intent-filter>
+            <action android:name="android.content.SyncAdapter"></action>
+        </intent-filter>
+        <meta-data
+            android:name="android.content.SyncAdapter"
+            android:resource="@xml/syncadapter"/>
         </service>
     </application>
 

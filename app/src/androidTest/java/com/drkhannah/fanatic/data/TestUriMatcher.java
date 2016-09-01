@@ -20,9 +20,11 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 public class TestUriMatcher extends AndroidTestCase {
-    private static final long TEST_SEARCH_ID = 1;
+    private static final String TEST_CATEGORY = "music";
+    private static final String TEST_LOCATION = "44107";
+    private static final String TEST_KEYWORDS = "rock";
     private static final String TEST_START_TIME = "9:00";
-    private static final String TEST_TITLE = "title";
+    private static final String TEST_TITLE = "Title";
 ;
 
     // content://com.drkhannah.fanatic.provider/events"
@@ -31,11 +33,11 @@ public class TestUriMatcher extends AndroidTestCase {
     // content://com.drkhannah.fanatic.provider/search"
     private static final Uri TEST_SEARCH_DIR = DBContract.SearchEntry.CONTENT_URI;
 
-    // content://com.drkhannah.fanatic.provider/events/#"
-    private static final Uri TEST_EVENTS_FOR_SEARCH_DIR = DBContract.EventsEntry.buildEventListForSearchUri(TEST_SEARCH_ID);
+    // content://com.drkhannah.fanatic.provider/events/category/location/keywords"
+    private static final Uri TEST_EVENTS_FOR_SEARCH_DIR = DBContract.EventsEntry.buildEventListForSearchUri(TEST_CATEGORY, TEST_LOCATION, TEST_KEYWORDS);
 
-    // content://com.drkhannah.fanatic.provider/events/#/*/*"
-    private static final Uri TEST_EVENT_FOR_DATE_AND_TITLE_DIR = DBContract.EventsEntry.buildEventListForSearchWithDateAndTitleUri(TEST_SEARCH_ID, TEST_START_TIME, TEST_TITLE);
+    // content://com.drkhannah.fanatic.provider/events/category/location/keywords/date/time"
+    private static final Uri TEST_EVENT_FOR_DATE_AND_TITLE_DIR = DBContract.EventsEntry.buildEventForSearchWithDateAndTitleUri(TEST_CATEGORY, TEST_LOCATION, TEST_KEYWORDS, TEST_START_TIME, TEST_TITLE);
 
 
     /*

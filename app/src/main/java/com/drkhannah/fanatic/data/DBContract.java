@@ -72,26 +72,34 @@ public class DBContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        //builds a URI from a search_id
-        public static Uri buildEventListForSearchUri(long searchId) {
-            return CONTENT_URI.buildUpon().appendPath(String.valueOf(searchId)).build();
+        //builds a URI from a events/category/location/keywords
+        public static Uri buildEventListForSearchUri(String category, String location, String keywords) {
+            return CONTENT_URI.buildUpon().appendPath(category).appendPath(location).appendPath(keywords).build();
         }
 
-        //builds a URI from a search_id and date and title
-        public static Uri buildEventListForSearchWithDateAndTitleUri(long searchId, String date, String title) {
-            return CONTENT_URI.buildUpon().appendPath(String.valueOf(searchId)).appendPath(date).appendPath(title).build();
+        //builds a URI from a events/searchId/date/title
+        public static Uri buildEventForSearchWithDateAndTitleUri(String category, String location, String keywords, String date, String title) {
+            return CONTENT_URI.buildUpon().appendPath(category).appendPath(location).appendPath(keywords).appendPath(date).appendPath(title).build();
         }
 
-        public static long getSearchIdFromUri(Uri uri) {
-            return Long.parseLong(uri.getPathSegments().get(1));
+        public static String getCategoryFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
         }
 
-        public static String getStartTimeFromUri(Uri uri) {
+        public static String getLocationFromUri(Uri uri) {
             return uri.getPathSegments().get(2);
         }
 
-        public static String getTitleFromUri(Uri uri) {
+        public static String getKeywordsFromUri(Uri uri) {
             return uri.getPathSegments().get(3);
+        }
+
+        public static String getStartTimeFromUri(Uri uri) {
+            return uri.getPathSegments().get(4);
+        }
+
+        public static String getTitleFromUri(Uri uri) {
+            return uri.getPathSegments().get(5);
         }
 
 

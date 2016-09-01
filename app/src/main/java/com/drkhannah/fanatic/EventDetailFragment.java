@@ -30,11 +30,15 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
      * The fragment argument representing the event ID that this fragment
      * represents.
      */
-    public static final String SEARCH_ID_ARG = "search_id_arg";
+    public static final String CATEGORY_ARG = "category_arg";
+    public static final String LOCATION_ARG = "location_arg";
+    public static final String KEYWORDS_ARG = "keywords_arg";
     public static final String TITLE_ARG = "title_arg";
     public static final String START_TIME_ARG = "start_time_arg";
 
-    private long mSearchId;
+    private String mCategory;
+    private String mLocation;
+    private String mKeywords;
     private String mTitle;
     private String mStartTime;
 
@@ -64,8 +68,14 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
         Activity activity = this.getActivity();
         mAppBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
 
-        if (getArguments().containsKey(SEARCH_ID_ARG)) {
-            mSearchId = getArguments().getLong(SEARCH_ID_ARG);
+        if (getArguments().containsKey(CATEGORY_ARG)) {
+            mCategory = getArguments().getString(CATEGORY_ARG);
+        }
+        if (getArguments().containsKey(CATEGORY_ARG)) {
+            mLocation = getArguments().getString(LOCATION_ARG);
+        }
+        if (getArguments().containsKey(CATEGORY_ARG)) {
+            mKeywords = getArguments().getString(KEYWORDS_ARG);
         }
         if (getArguments().containsKey(TITLE_ARG)) {
             mTitle = getArguments().getString(TITLE_ARG);
@@ -95,7 +105,7 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri singleEventUri = DBContract.EventsEntry.buildEventListForSearchWithDateAndTitleUri(mSearchId, mStartTime, mTitle);
+        Uri singleEventUri = DBContract.EventsEntry.buildEventForSearchWithDateAndTitleUri(mCategory, mLocation, mCategory, mStartTime, mTitle);
         return new CursorLoader(getContext(), singleEventUri, null, null, null, null);
     }
 
