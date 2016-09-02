@@ -7,34 +7,64 @@
     tools:context="com.drkhannah.fanatic.EventDetailFragment">
 
     <ImageView
-        android:id="@+id/event_imageview"
+        android:id="@+id/event_detail_imageview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:scaleType="fitCenter"/>
+        android:scaleType="fitCenter"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"/>
 
     <TextView
         android:id="@+id/detail_title_textview"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:textColor="@color/colorPrimaryDark"
+        style="@style/TextAppearance.StatusBar.EventContent.Title"
+        />
 
     <TextView
-        android:id="@+id/detail_start_time_textview"
+        android:id="@+id/start_time_textview"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:textColor="@color/colorPrimary"
+        style="@style/TextAppearance.StatusBar.EventContent.Time"/>
 
     <TextView
-        android:id="@+id/detail_venue_name_textview"
+        android:id="@+id/venue_name_textview"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        style="@style/TextAppearance.StatusBar.EventContent.Line2"/>
 
     <TextView
         android:id="@+id/detail_description_textview"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"/>
 
     <TextView
         android:id="@+id/detail_performers_textview"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"/>
 
 </LinearLayout>

@@ -36,4 +36,6 @@
     <string name="menu_title_map">Map</string>
     <string name="menu_title_tickets">Tickets</string>
     <string name="share_event">Share Event</string>
+    <string name="fetching_events">Fetching Events</string>
+    <string name="response_image_size" translatable="false">large</string>
 </resources>

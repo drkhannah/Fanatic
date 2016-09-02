@@ -39,6 +39,7 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
     public static final String KEYWORDS_ARG = "keywords_arg";
     public static final String TITLE_ARG = "title_arg";
     public static final String START_TIME_ARG = "start_time_arg";
+    public static final String TWO_PANE_MODE = "two_pane_mode";
 
     private String mCategory;
     private String mLocation;
@@ -49,6 +50,7 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
     private String mLatitude;
     private String mGeo;
     private String mLocationQuery;
+    private boolean mTwoPane;
 
     private TextView mTitleTextView;
     private TextView mStartTimeTextView;
@@ -56,6 +58,7 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
     private TextView mDescriptionTextView;
     private TextView mPerformersTextView;
 
+    private ImageView mToolbarImageView;
     private ImageView mEventImageView;
 
     private CollapsingToolbarLayout mAppBarLayout;
@@ -77,14 +80,15 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
 
         Activity activity = this.getActivity();
         mAppBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+        mToolbarImageView = (ImageView) activity.findViewById(R.id.event_imageview);
 
         if (getArguments().containsKey(CATEGORY_ARG)) {
             mCategory = getArguments().getString(CATEGORY_ARG);
         }
-        if (getArguments().containsKey(CATEGORY_ARG)) {
+        if (getArguments().containsKey(LOCATION_ARG)) {
             mLocation = getArguments().getString(LOCATION_ARG);
         }
-        if (getArguments().containsKey(CATEGORY_ARG)) {
+        if (getArguments().containsKey(KEYWORDS_ARG)) {
             mKeywords = getArguments().getString(KEYWORDS_ARG);
         }
         if (getArguments().containsKey(TITLE_ARG)) {
@@ -93,19 +97,21 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
         if (getArguments().containsKey(START_TIME_ARG)) {
             mStartTime = getArguments().getString(START_TIME_ARG);
         }
+        if (getArguments().containsKey(TWO_PANE_MODE)) {
+            mTwoPane = getArguments().getBoolean(TWO_PANE_MODE);
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.event_detail, container, false);
 
-        mEventImageView = (ImageView) rootView.findViewById(R.id.event_imageview);
-
         mTitleTextView = (TextView) rootView.findViewById(R.id.detail_title_textview);
-        mStartTimeTextView = (TextView) rootView.findViewById(R.id.detail_start_time_textview);
-        mVenueNameTextView = (TextView) rootView.findViewById(R.id.detail_venue_name_textview);
+        mStartTimeTextView = (TextView) rootView.findViewById(R.id.start_time_textview);
+        mVenueNameTextView = (TextView) rootView.findViewById(R.id.venue_name_textview);
         mDescriptionTextView = (TextView) rootView.findViewById(R.id.detail_description_textview);
         mPerformersTextView = (TextView) rootView.findViewById(R.id.detail_performers_textview);
+        mEventImageView = (ImageView) rootView.findViewById(R.id.event_detail_imageview);
 
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
 
@@ -171,36 +177,43 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
             mStartTimeTextView.setText(startTime);
             mVenueNameTextView.setText(venueName);
 
-            if (imageUrl != null) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mTwoPane) {
                         mTitleTextView.setText(title);
-                        Picasso.with(getContext()).load(imageUrl).into(mEventImageView);
+                        Picasso.with(getActivity())
+                                .load(imageUrl)
+                                .into(mEventImageView);
+                    } else {
+                        Picasso.with(getActivity())
+                                .load(imageUrl)
+                                .into(mToolbarImageView);
                     }
-                });
-            }
+                }
+            });
 
-            if (!description.equalsIgnoreCase(getActivity().getString(R.string.null_string))) {
-                mDescriptionTextView.setText(description);
-            }
-
-            if (!performers.equalsIgnoreCase(getActivity().getString(R.string.null_string))) {
-                mPerformersTextView.setText(performers);
-            }
-
-            mLongitude = longitude;
-            mLatitude = latitude;
-            mLocationQuery = venueName;
-            StringBuilder geoString = new StringBuilder()
-                    .append("geo:")
-                    .append(mLatitude)
-                    .append(",")
-                    .append(mLongitude)
-                    .append("?");
-            mGeo = geoString.toString();
+        if (!description.equalsIgnoreCase(getActivity().getString(R.string.null_string))) {
+            mDescriptionTextView.setText(description);
         }
+
+        if (!performers.equalsIgnoreCase(getActivity().getString(R.string.null_string))) {
+            mPerformersTextView.setText(performers);
+        }
+
+        mLongitude = longitude;
+        mLatitude = latitude;
+        mLocationQuery = venueName;
+        StringBuilder geoString = new StringBuilder()
+                .append("geo:")
+                .append(mLatitude)
+                .append(",")
+                .append(mLongitude)
+                .append("?");
+        mGeo = geoString.toString();
     }
+
+}
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {

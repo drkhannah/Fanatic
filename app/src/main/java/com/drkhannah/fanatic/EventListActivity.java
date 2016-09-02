@@ -1,11 +1,16 @@
 package com.drkhannah.fanatic;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -53,6 +58,9 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
     //loader identifier number
     public static final int EVENTS_LOADER = 0;
 
+    private JobScheduler mJobScheduler;
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +106,12 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         mEmptyListTextView = (TextView) findViewById(R.id.empty_events_textview);
         mEmptyListTextView.setText(R.string.prompt_search_events);
         setAlarm();
+
+        //job scheduler
+        mJobScheduler = (JobScheduler) getSystemService( Context.JOB_SCHEDULER_SERVICE );
+        JobInfo.Builder builder = new JobInfo.Builder( 1, new ComponentName( getPackageName(), JobSchedulerService.class.getName() ) );
+        builder.setMinimumLatency(1000);
+        mJobScheduler.schedule(builder.build());
     }
 
     @Override
@@ -123,8 +137,12 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        mRecyclerViewAdapter = new RecyclerViewAdapter(null, getSupportFragmentManager(), mTwoPane);
+        mRecyclerViewAdapter = new RecyclerViewAdapter(this, null, getSupportFragmentManager(), mTwoPane);
         recyclerView.setAdapter(mRecyclerViewAdapter);
+    }
+
+    public boolean getMode() {
+        return mTwoPane;
     }
 
     /**
@@ -167,6 +185,8 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         } else {
             Log.d(LOG_TAG, "cursor returned 0");
             SyncAdapter.syncNow(this);
+            mEmptyListTextView.setText(R.string.fetching_events);
+
         }
     }
 

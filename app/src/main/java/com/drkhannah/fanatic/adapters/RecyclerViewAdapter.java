@@ -21,11 +21,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Cursor mCursor;
     private FragmentManager mFragmentManager;
     private boolean mTwoPane;
+    private Context mContext;
 
-    public RecyclerViewAdapter(Cursor cursor, FragmentManager fragmentManager, boolean twoPaneMode) {
+    public RecyclerViewAdapter(Context context, Cursor cursor, FragmentManager fragmentManager, boolean twoPaneMode) {
         mCursor = cursor;
         mFragmentManager = fragmentManager;
         mTwoPane = twoPaneMode;
+        mContext = context;
     }
 
     @Override
@@ -44,6 +46,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         final String title = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.EventsEntry.TITLE));
         final String startTime = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.EventsEntry.START_TIME));
         String venueName = mCursor.getString(mCursor.getColumnIndexOrThrow(DBContract.EventsEntry.VENUE_NAME));
+
         holder.mEventTitleTextView.setText(title);
         holder.mStartTimeTextView.setText(startTime);
         holder.mVenueNameTextView.setText(venueName);
@@ -59,6 +62,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     arguments.putString(EventDetailFragment.KEYWORDS_ARG, keywords);
                     arguments.putString(EventDetailFragment.TITLE_ARG, title);
                     arguments.putString(EventDetailFragment.START_TIME_ARG, startTime);
+                    arguments.putBoolean(EventDetailFragment.TWO_PANE_MODE, mTwoPane);
                     EventDetailFragment fragment = new EventDetailFragment();
                     fragment.setArguments(arguments);
                     mFragmentManager.beginTransaction()
@@ -102,17 +106,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             super(view);
             mView = view;
             mEventTitleTextView = (TextView) view.findViewById(R.id.event_title_textview);
-            mStartTimeTextView = (TextView) view.findViewById(R.id.detail_start_time_textview);
-            mVenueNameTextView = (TextView) view.findViewById(R.id.detail_venue_name_textview);
-        }
-
-        @Override
-        public String toString() {
-            return "ViewHolder{" +
-                    "mEventTitleTextView=" + mEventTitleTextView +
-                    ", mStartTimeTextView=" + mStartTimeTextView +
-                    ", mVenueNameTextView=" + mVenueNameTextView +
-                    '}';
+            mStartTimeTextView = (TextView) view.findViewById(R.id.start_time_textview);
+            mVenueNameTextView = (TextView) view.findViewById(R.id.venue_name_textview);
         }
     }
 }

@@ -113,7 +113,7 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
         final String LONGITUDE = "longitude";
         final String LATITUDE = "latitude";
         final String IMAGE = "image";
-        final String IMAGE_SIZE = "medium";
+        final String IMAGE_SIZE = "large";
         final String IMAGE_URL = "url";
         final String DESCRIPTION = "description";
 
@@ -162,8 +162,8 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
                         JSONObject jsonImage = jsonEvent.optJSONObject(IMAGE);
                         String imageUrl;
                         if (jsonImage != null) {
-                            JSONObject jsonImageSmall = jsonImage.optJSONObject(IMAGE_SIZE);
-                            imageUrl = jsonImageSmall.optString(IMAGE_URL);
+                            JSONObject jsonImageLarge = jsonImage.optJSONObject(IMAGE_SIZE);
+                            imageUrl = jsonImageLarge.optString(IMAGE_URL);
                         } else {
                             imageUrl= null;
                         }
@@ -216,7 +216,6 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
 
         try {
 
-            // URL for bands api query
             //Build a uri to construct a valid url
             final String BASE_URL = "http://api.eventful.com/json/events/search?";
             final String API_KEY = "app_key";
@@ -224,6 +223,7 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
             final String LOCATION = "location";
             final String KEYWORDS = "keywords";
             final String PAGE_SIZE = "page_size";
+            final String IMAGE_SIZE = "large";
 
             //build a valid URI
             Uri validUri = Uri.parse(BASE_URL).buildUpon()
@@ -232,6 +232,7 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
                     .appendQueryParameter(LOCATION, LOCATION_TO_SEARCH)
                     .appendQueryParameter(KEYWORDS, KEYWORDS_TO_SEARCH)
                     .appendQueryParameter(PAGE_SIZE, mContext.getString(R.string.response_page_size))
+                    .appendQueryParameter(IMAGE_SIZE, mContext.getString(R.string.response_image_size))
                     .build();
 
             URL url = new URL(validUri.toString());
@@ -266,7 +267,7 @@ public class GetEventsTask extends AsyncTask<String, Void, Void> {
 
             eventsJsonString = buffer.toString();
 
-            Log.v(LOG_TAG, "RESPONSE FROM BANDSINTOWN: " + eventsJsonString);
+            Log.v(LOG_TAG, "RESPONSE FROM Eventful: " + eventsJsonString);
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "ERROR GETTING RESPONSE: " + e);
