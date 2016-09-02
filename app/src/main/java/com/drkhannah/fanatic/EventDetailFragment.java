@@ -1,6 +1,7 @@
 package com.drkhannah.fanatic;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,6 +11,9 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -41,6 +45,10 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
     private String mKeywords;
     private String mTitle;
     private String mStartTime;
+    private String mLongitude;
+    private String mLatitude;
+    private String mGeo;
+    private String mLocationQuery;
 
     private TextView mTitleTextView;
     private TextView mStartTimeTextView;
@@ -59,11 +67,13 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
      * fragment (e.g. upon screen orientation changes).
      */
     public EventDetailFragment() {
+        setHasOptionsMenu(true);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         Activity activity = this.getActivity();
         mAppBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
@@ -102,10 +112,42 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
         return rootView;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_detail, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_map:
+                if (mGeo != null || mLocationQuery != null) {
+                    //implicit intent to open up the concerts location in a map app
+                    Uri gmmIntentUri = Uri.parse(mGeo).buildUpon()
+                            .appendQueryParameter("q", mLocationQuery)
+                            .build();
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                    if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        startActivity(mapIntent);
+                    }
+                }
+                break;
+            case R.id.action_share:
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, mTitleTextView.getText());
+                //create a chooser and set the title so users can pick the app they want to share with
+                startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.share_event)));
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri singleEventUri = DBContract.EventsEntry.buildEventForSearchWithDateAndTitleUri(mCategory, mLocation, mCategory, mStartTime, mTitle);
+        Uri singleEventUri = DBContract.EventsEntry.buildEventForSearchWithDateAndTitleUri(mCategory, mLocation, mKeywords, mStartTime, mTitle);
         return new CursorLoader(getContext(), singleEventUri, null, null, null, null);
     }
 
@@ -118,11 +160,18 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
             final String venueName = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.VENUE_NAME));
             final String description = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.DESCRIPTION));
             final String performers = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.PERFORMERS));
+            final String longitude = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.LONGITUDE));
+            final String latitude = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.LATITUDE));
             final String imageUrl = cursor.getString(cursor.getColumnIndexOrThrow(DBContract.EventsEntry.IMG_URL));
 
             if (mAppBarLayout != null) {
                 mAppBarLayout.setTitle(title);
-            } else {
+            }
+
+            mStartTimeTextView.setText(startTime);
+            mVenueNameTextView.setText(venueName);
+
+            if (imageUrl != null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -132,9 +181,6 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
                 });
             }
 
-            mStartTimeTextView.setText(startTime);
-            mVenueNameTextView.setText(venueName);
-
             if (!description.equalsIgnoreCase(getActivity().getString(R.string.null_string))) {
                 mDescriptionTextView.setText(description);
             }
@@ -143,7 +189,16 @@ public class EventDetailFragment extends Fragment implements LoaderManager.Loade
                 mPerformersTextView.setText(performers);
             }
 
-
+            mLongitude = longitude;
+            mLatitude = latitude;
+            mLocationQuery = venueName;
+            StringBuilder geoString = new StringBuilder()
+                    .append("geo:")
+                    .append(mLatitude)
+                    .append(",")
+                    .append(mLongitude)
+                    .append("?");
+            mGeo = geoString.toString();
         }
     }
 

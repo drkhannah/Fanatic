@@ -73,6 +73,7 @@
             android:name=".EventIntentService"
             android:exported="false">
         </service>
+        <receiver android:name=".AlarmReceiver"/>
 
         <service
             android:name="com.drkhannah.fanatic.sync.AuthenticatorService">

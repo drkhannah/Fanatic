@@ -32,4 +32,8 @@
     <string name="null_string" translatable="false">null</string>
     <string name="sync_account_type" translatable="false">fanatic.drkhannah.com</string>
     <string name="content_authority" translatable="false">com.drkhannah.fanatic.provider</string>
+    <string name="menu_title_share">Share</string>
+    <string name="menu_title_map">Map</string>
+    <string name="menu_title_tickets">Tickets</string>
+    <string name="share_event">Share Event</string>
 </resources>

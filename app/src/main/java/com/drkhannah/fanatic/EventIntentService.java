@@ -3,8 +3,8 @@ package com.drkhannah.fanatic;
 import android.app.IntentService;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -322,4 +322,5 @@ public class EventIntentService extends IntentService {
 
         return searchId;
     }
+
 }

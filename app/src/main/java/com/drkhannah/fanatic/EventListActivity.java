@@ -1,5 +1,8 @@
 package com.drkhannah.fanatic;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -94,6 +97,7 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
 
         mEmptyListTextView = (TextView) findViewById(R.id.empty_events_textview);
         mEmptyListTextView.setText(R.string.prompt_search_events);
+        setAlarm();
     }
 
     @Override
@@ -162,14 +166,20 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
             mEmptyListTextView.setText(null);
         } else {
             Log.d(LOG_TAG, "cursor returned 0");
-            if (SyncAdapter.sSyncedNewAccount) {
-                SyncAdapter.syncNow(this);
-            }
+            SyncAdapter.syncNow(this);
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mRecyclerViewAdapter.swapCursor(null);
+    }
+
+    public void setAlarm() {
+        Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, pendingIntent);
     }
 }

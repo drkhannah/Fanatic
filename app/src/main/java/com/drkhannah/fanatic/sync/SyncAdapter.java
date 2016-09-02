@@ -50,7 +50,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final int SYNC_INTERVAL = 60 * 180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
 
-    public static boolean sSyncedNewAccount = false;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -72,8 +71,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         String location = Utils.getLocationFromSharedPref(mContext);
         String keywords = Utils.getKeywordsFromSharedPref(mContext);
 
-
-
         String eventsJsonString = null;
 
         //get what was passed to GetEventsTask.execute();
@@ -86,7 +83,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         try {
 
-            // URL for bands api query
             //Build a uri to construct a valid url
             final String BASE_URL = "http://api.eventful.com/json/events/search?";
             final String API_KEY = "app_key";
@@ -136,7 +132,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             eventsJsonString = buffer.toString();
 
-            Log.v(LOG_TAG, "RESPONSE FROM BANDSINTOWN: " + eventsJsonString);
+            Log.v(LOG_TAG, "RESPONSE FROM EVENTFUL: " + eventsJsonString);
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "ERROR GETTING RESPONSE: " + e);
@@ -259,7 +255,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
 
                 Log.d(LOG_TAG, "Sync bulkInsert Complete. " + inserted + " Inserted");
-                sSyncedNewAccount = true;
             }
         }
         return;
