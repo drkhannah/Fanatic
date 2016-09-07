@@ -25,7 +25,7 @@
     <string name="menu_title_search_keywords">Search Keywords</string>
     <string name="pref_keywords_key" translatable="false">keywords</string>
     <string name="label_search_activity">Search Activity</string>
-    <string name="pref_default_keyword">rock</string>
+    <string name="pref_default_keywords">rock</string>
     <string name="pref_default_category">music</string>
     <string name="last_search_id" translatable="false">last_search_id</string>
     <string name="no_event_description">no description</string>
@@ -38,4 +38,5 @@
     <string name="share_event">Share Event</string>
     <string name="fetching_events">Fetching Events</string>
     <string name="response_image_size" translatable="false">large</string>
+    <string name="pref_keywords_title">Keywords</string>
 </resources>

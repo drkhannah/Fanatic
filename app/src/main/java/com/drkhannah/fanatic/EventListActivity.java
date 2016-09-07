@@ -185,8 +185,8 @@ public class EventListActivity extends AppCompatActivity implements NavigationVi
         } else {
             Log.d(LOG_TAG, "cursor returned 0");
             SyncAdapter.syncNow(this);
-            mEmptyListTextView.setText(R.string.fetching_events);
-
+            mEmptyListTextView.setText(R.string.no_events_returned_label);
+            mRecyclerViewAdapter.swapCursor(null);
         }
     }
 

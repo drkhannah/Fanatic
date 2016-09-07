@@ -9,13 +9,19 @@
         android:key="@string/pref_location_key"
         android:title="@string/pref_location_title"/>
 
+    <EditTextPreference
+        android:defaultValue="@string/pref_default_keywords"
+        android:inputType="text"
+        android:key="@string/pref_keywords_key"
+        android:title="@string/pref_keywords_title"/>
+
 
     <ListPreference
         android:dialogTitle="@string/dialog_title_perf_category"
         android:entries="@array/listentries"
         android:entryValues="@array/listvalues"
         android:key="@string/pref_category_key"
-        android:defaultValue="1"
+        android:defaultValue="@string/pref_default_category"
         android:title="@string/perf_category_title"/>
 
 </PreferenceScreen>
